@@ -10,6 +10,7 @@ import {
   RefreshControl,
 } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
+import { Ionicons } from '@expo/vector-icons';
 import { clearToken, clearUser } from '../storage/authStorage.js';
 import { getHealthStats, getProfile } from '../services/api.js';
 import GreetingHeader from '../components/GreetingHeader.js';
@@ -91,29 +92,35 @@ const SummaryScreen = ({ navigation }) => {
             style={styles.quickButton}
             onPress={() => navigation.navigate('WaterTab')}
           >
-            <Text style={styles.quickButtonText}>💧 +Nước</Text>
+            <Ionicons name="water" size={18} color="#fff" style={styles.quickButtonIcon} />
+            <Text style={styles.quickButtonText}>+Nước</Text>
           </TouchableOpacity>
           <TouchableOpacity
             style={styles.quickButton}
             onPress={() => navigation.navigate('ExerciseTab')}
           >
-            <Text style={styles.quickButtonText}>🏃 +Tập</Text>
+            <Ionicons name="fitness" size={18} color="#fff" style={styles.quickButtonIcon} />
+            <Text style={styles.quickButtonText}>+Tập</Text>
           </TouchableOpacity>
           <TouchableOpacity
             style={styles.quickButton}
             onPress={() => navigation.navigate('SleepTab')}
           >
-            <Text style={styles.quickButtonText}>😴 +Ngủ</Text>
+            <Ionicons name="moon" size={18} color="#fff" style={styles.quickButtonIcon} />
+            <Text style={styles.quickButtonText}>+Ngủ</Text>
           </TouchableOpacity>
         </View>
 
         {/* Widgets Grid */}
-        <Text style={styles.sectionTitle}>📊 Tổng quan hôm nay</Text>
+        <View style={styles.sectionTitleRow}>
+          <Ionicons name="stats-chart" size={20} color="#333" />
+          <Text style={styles.sectionTitle}>Tổng quan hôm nay</Text>
+        </View>
 
         <View style={styles.widgetRow}>
           {/* BMI Widget */}
           <WidgetCard
-            icon="⚖️"
+            icon="scale"
             title="BMI"
             value={bmiValue}
             subtitle={bmiCategory.label}
@@ -123,7 +130,7 @@ const SummaryScreen = ({ navigation }) => {
 
           {/* Water Widget */}
           <WidgetCard
-            icon="💧"
+            icon="water"
             title="Nước"
             value={waterData.current}
             unit={`/${waterData.goal}ml`}
@@ -137,18 +144,19 @@ const SummaryScreen = ({ navigation }) => {
         <View style={styles.widgetRow}>
           {/* Exercise Widget */}
           <WidgetCard
-            icon="🏃"
+            icon="fitness"
             title="Tập luyện"
             value={exerciseData.todayMinutes}
             unit="phút"
-            subtitle={`🔥 ${exerciseData.streak} ngày streak`}
+            subtitle={`${exerciseData.streak} ngày streak`}
+            subtitleIcon="flame"
             backgroundColor="#f1f8e9"
             onPress={() => navigation.navigate('ExerciseTab')}
           />
 
           {/* Sleep Widget */}
           <WidgetCard
-            icon="😴"
+            icon="moon"
             title="Giấc ngủ"
             value={sleepData.lastNight}
             unit="tiếng"
@@ -160,7 +168,10 @@ const SummaryScreen = ({ navigation }) => {
 
         {/* Health Insights */}
         <View style={styles.insightsCard}>
-          <Text style={styles.insightsTitle}>💡 Gợi ý hôm nay</Text>
+          <View style={styles.insightsTitleRow}>
+            <Ionicons name="bulb" size={18} color="#f57f17" />
+            <Text style={styles.insightsTitle}>Gợi ý hôm nay</Text>
+          </View>
           {waterProgress < 50 && (
             <Text style={styles.insightText}>• Bạn mới uống {Math.round(waterProgress)}% lượng nước. Hãy uống thêm!</Text>
           )}
@@ -171,7 +182,7 @@ const SummaryScreen = ({ navigation }) => {
             <Text style={styles.insightText}>• Đêm qua bạn ngủ chưa đủ giấc. Cố gắng ngủ 7-8 tiếng tối nay.</Text>
           )}
           {waterProgress >= 80 && exerciseData.todayMinutes >= 30 && sleepData.lastNight >= 7 && (
-            <Text style={styles.insightText}>• Tuyệt vời! Bạn đang chăm sóc sức khỏe rất tốt! 🎉</Text>
+            <Text style={styles.insightText}>• Tuyệt vời! Bạn đang chăm sóc sức khỏe rất tốt!</Text>
           )}
         </View>
 
@@ -254,17 +265,28 @@ const styles = StyleSheet.create({
     paddingVertical: 12,
     borderRadius: 12,
     alignItems: 'center',
+    flexDirection: 'row',
+    justifyContent: 'center',
+    gap: 6,
+  },
+  quickButtonIcon: {
+    marginRight: 2,
   },
   quickButtonText: {
     color: '#fff',
     fontSize: 14,
     fontWeight: '700',
   },
+  sectionTitleRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 8,
+    marginBottom: 12,
+  },
   sectionTitle: {
     fontSize: 18,
     fontWeight: '800',
     color: '#333',
-    marginBottom: 12,
   },
   widgetRow: {
     flexDirection: 'row',
@@ -279,11 +301,16 @@ const styles = StyleSheet.create({
     borderWidth: 1,
     borderColor: '#f9a825',
   },
+  insightsTitleRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 6,
+    marginBottom: 10,
+  },
   insightsTitle: {
     fontSize: 16,
     fontWeight: '800',
     color: '#f57f17',
-    marginBottom: 10,
   },
   insightText: {
     fontSize: 14,

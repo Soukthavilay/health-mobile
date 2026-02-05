@@ -1,5 +1,6 @@
 import React from 'react';
 import { View, Text, StyleSheet, TouchableOpacity } from 'react-native';
+import { Ionicons } from '@expo/vector-icons';
 
 const WidgetCard = ({
   icon,
@@ -7,6 +8,7 @@ const WidgetCard = ({
   value,
   unit,
   subtitle,
+  subtitleIcon,
   progress,
   progressColor = '#0b3d91',
   backgroundColor = '#fff',
@@ -19,7 +21,7 @@ const WidgetCard = ({
       activeOpacity={0.8}
     >
       <View style={styles.header}>
-        <Text style={styles.icon}>{icon}</Text>
+        <Ionicons name={icon} size={18} color="#555" style={styles.icon} />
         <Text style={styles.title}>{title}</Text>
       </View>
 
@@ -28,7 +30,12 @@ const WidgetCard = ({
         {unit && <Text style={styles.unit}>{unit}</Text>}
       </View>
 
-      {subtitle && <Text style={styles.subtitle}>{subtitle}</Text>}
+      {subtitle && (
+        <View style={styles.subtitleRow}>
+          {subtitleIcon && <Ionicons name={subtitleIcon} size={12} color="#666" style={styles.subtitleIcon} />}
+          <Text style={styles.subtitle}>{subtitle}</Text>
+        </View>
+      )}
 
       {progress !== undefined && (
         <View style={styles.progressBar}>
@@ -60,7 +67,6 @@ const styles = StyleSheet.create({
     marginBottom: 8,
   },
   icon: {
-    fontSize: 18,
     marginRight: 6,
   },
   title: {
@@ -83,10 +89,17 @@ const styles = StyleSheet.create({
     color: '#666',
     marginLeft: 4,
   },
+  subtitleRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    marginTop: 4,
+  },
+  subtitleIcon: {
+    marginRight: 4,
+  },
   subtitle: {
     fontSize: 11,
     color: '#666',
-    marginTop: 4,
   },
   progressBar: {
     height: 6,
