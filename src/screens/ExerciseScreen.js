@@ -13,6 +13,7 @@ import {
   RefreshControl,
 } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
+import { Ionicons } from '@expo/vector-icons';
 import { BarChart } from 'react-native-chart-kit';
 import { useFocusEffect } from '@react-navigation/native';
 import {
@@ -24,13 +25,13 @@ import {
 } from '../services/api.js';
 
 const EXERCISE_TYPES = [
-  { id: 'running', label: '🏃 Chạy bộ', caloriesPerMin: 10 },
-  { id: 'walking', label: '🚶 Đi bộ', caloriesPerMin: 5 },
-  { id: 'gym', label: '🏋️ Gym', caloriesPerMin: 8 },
-  { id: 'yoga', label: '🧘 Yoga', caloriesPerMin: 4 },
-  { id: 'swimming', label: '🏊 Bơi', caloriesPerMin: 9 },
-  { id: 'cycling', label: '🚴 Đạp xe', caloriesPerMin: 7 },
-  { id: 'other', label: '💪 Khác', caloriesPerMin: 6 },
+  { id: 'running', label: 'Chạy bộ', icon: 'walk', caloriesPerMin: 10 },
+  { id: 'walking', label: 'Đi bộ', icon: 'walk-outline', caloriesPerMin: 5 },
+  { id: 'gym', label: 'Gym', icon: 'barbell', caloriesPerMin: 8 },
+  { id: 'yoga', label: 'Yoga', icon: 'body', caloriesPerMin: 4 },
+  { id: 'swimming', label: 'Bơi', icon: 'water', caloriesPerMin: 9 },
+  { id: 'cycling', label: 'Đạp xe', icon: 'bicycle', caloriesPerMin: 7 },
+  { id: 'other', label: 'Khác', icon: 'fitness', caloriesPerMin: 6 },
 ];
 
 const ExerciseScreen = () => {
@@ -76,8 +77,10 @@ const ExerciseScreen = () => {
           e.exercised_at?.startsWith(dateStr)
         ) || [];
         const totalMins = dayExercises.reduce((sum, e) => sum + (e.duration_min || 0), 0);
+        const day = String(d.getDate()).padStart(2, '0');
+        const month = String(d.getMonth() + 1).padStart(2, '0');
         last7Days.push({
-          date: d.toLocaleDateString('vi-VN', { day: '2-digit', month: '2-digit' }),
+          date: `${day}/${month}`,
           minutes: totalMins,
         });
       }
@@ -198,6 +201,10 @@ const ExerciseScreen = () => {
     return EXERCISE_TYPES.find((t) => t.id === typeId)?.label || typeId;
   };
 
+  const getTypeIcon = (typeId) => {
+    return EXERCISE_TYPES.find((t) => t.id === typeId)?.icon || 'fitness';
+  };
+
   const chartData = {
     labels: weeklyData.map((d) => d.date),
     datasets: [{ data: weeklyData.length > 0 ? weeklyData.map((d) => d.minutes || 0) : [0] }],
@@ -220,13 +227,16 @@ const ExerciseScreen = () => {
         contentContainerStyle={styles.container}
         refreshControl={<RefreshControl refreshing={refreshing} onRefresh={onRefresh} colors={['#e65100']} />}
       >
-        <Text style={styles.title}>🏃 Tập thể dục</Text>
+        <View style={styles.titleRow}>
+          <Ionicons name="fitness" size={28} color="#2e7d32" />
+          <Text style={styles.title}>Tập thể dục</Text>
+        </View>
         <Text style={styles.subtitle}>Theo dõi vận động hằng ngày</Text>
 
         {/* Streak Card */}
         <View style={styles.streakCard}>
           <View style={styles.streakMain}>
-            <Text style={styles.streakFire}>🔥</Text>
+            <Ionicons name="flame" size={28} color="#e65100" style={styles.streakIcon} />
             <Text style={styles.streakNumber}>{streak.current_streak}</Text>
             <Text style={styles.streakLabel}>ngày liên tục</Text>
           </View>
@@ -251,17 +261,21 @@ const ExerciseScreen = () => {
 
         {/* Add Exercise Button */}
         <TouchableOpacity style={styles.primaryButton} onPress={() => setModalVisible(true)}>
-          <Text style={styles.primaryButtonText}>+ Ghi nhận buổi tập</Text>
+          <Ionicons name="add-circle" size={20} color="#fff" style={styles.primaryButtonIcon} />
+          <Text style={styles.primaryButtonText}>Ghi nhận buổi tập</Text>
         </TouchableOpacity>
 
         {/* Weekly Chart */}
         {weeklyData.length > 0 && (
           <View style={styles.card}>
-            <Text style={styles.cardTitle}>📊 Tuần này (phút)</Text>
+            <View style={styles.cardTitleRow}>
+              <Ionicons name="bar-chart" size={18} color="#2e7d32" />
+              <Text style={styles.cardTitle}>Tuần này (phút)</Text>
+            </View>
             <BarChart
               data={chartData}
               width={Dimensions.get('window').width - 64}
-              height={160}
+              height={190}
               yAxisSuffix="m"
               chartConfig={{
                 backgroundColor: '#fff',
@@ -270,17 +284,24 @@ const ExerciseScreen = () => {
                 decimalPlaces: 0,
                 color: (opacity = 1) => `rgba(46, 125, 50, ${opacity})`,
                 labelColor: () => '#333',
-                barPercentage: 0.6,
+                barPercentage: 0.5,
+                propsForLabels: {
+                  fontSize: 11,
+                },
               }}
               style={{ marginTop: 8, borderRadius: 12 }}
               showValuesOnTopOfBars
+              fromZero
             />
           </View>
         )}
 
         {/* Exercise History */}
         <View style={styles.card}>
-          <Text style={styles.cardTitle}>📝 Lịch sử gần đây</Text>
+          <View style={styles.cardTitleRow}>
+            <Ionicons name="list" size={18} color="#2e7d32" />
+            <Text style={styles.cardTitle}>Lịch sử gần đây</Text>
+          </View>
           {exercises.length === 0 ? (
             <Text style={styles.emptyText}>Chưa có buổi tập nào</Text>
           ) : (
@@ -291,7 +312,10 @@ const ExerciseScreen = () => {
                 onLongPress={() => handleDeleteExercise(exercise.id)}
               >
                 <View style={styles.exerciseInfo}>
-                  <Text style={styles.exerciseType}>{getTypeLabel(exercise.type)}</Text>
+                  <View style={styles.exerciseTypeRow}>
+                    <Ionicons name={getTypeIcon(exercise.type)} size={16} color="#2e7d32" />
+                    <Text style={styles.exerciseType}>{getTypeLabel(exercise.type)}</Text>
+                  </View>
                   <Text style={styles.exerciseDate}>{formatDate(exercise.exercised_at)}</Text>
                 </View>
                 <View style={styles.exerciseStats}>
@@ -329,14 +353,21 @@ const ExerciseScreen = () => {
                     ]}
                     onPress={() => handleTypeSelect(type)}
                   >
-                    <Text
-                      style={[
-                        styles.typeButtonText,
-                        selectedType.id === type.id && styles.typeButtonTextSelected,
-                      ]}
-                    >
-                      {type.label}
-                    </Text>
+                    <View style={styles.typeButtonContent}>
+                      <Ionicons
+                        name={type.icon}
+                        size={16}
+                        color={selectedType.id === type.id ? '#fff' : '#2e7d32'}
+                      />
+                      <Text
+                        style={[
+                          styles.typeButtonText,
+                          selectedType.id === type.id && styles.typeButtonTextSelected,
+                        ]}
+                      >
+                        {type.label}
+                      </Text>
+                    </View>
                   </TouchableOpacity>
                 ))}
               </View>
@@ -403,11 +434,16 @@ const styles = StyleSheet.create({
     padding: 16,
     flexGrow: 1,
   },
+  titleRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 10,
+    marginBottom: 4,
+  },
   title: {
     fontSize: 28,
     fontWeight: '800',
     color: '#2e7d32',
-    marginBottom: 4,
   },
   subtitle: {
     fontSize: 16,
@@ -428,8 +464,7 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     marginBottom: 6,
   },
-  streakFire: {
-    fontSize: 32,
+  streakIcon: {
     marginRight: 8,
   },
   streakNumber: {
@@ -477,7 +512,13 @@ const styles = StyleSheet.create({
     paddingVertical: 16,
     borderRadius: 12,
     alignItems: 'center',
+    flexDirection: 'row',
+    justifyContent: 'center',
+    gap: 8,
     marginBottom: 16,
+  },
+  primaryButtonIcon: {
+    marginRight: 2,
   },
   primaryButtonText: {
     color: '#fff',
@@ -492,11 +533,16 @@ const styles = StyleSheet.create({
     borderWidth: 1,
     borderColor: '#2e7d32',
   },
+  cardTitleRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 8,
+    marginBottom: 12,
+  },
   cardTitle: {
     fontSize: 18,
     fontWeight: '800',
     color: '#2e7d32',
-    marginBottom: 12,
   },
   emptyText: {
     fontSize: 16,
@@ -514,6 +560,11 @@ const styles = StyleSheet.create({
   },
   exerciseInfo: {
     flex: 1,
+  },
+  exerciseTypeRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 6,
   },
   exerciseType: {
     fontSize: 16,
@@ -574,6 +625,11 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     flexWrap: 'wrap',
     gap: 8,
+  },
+  typeButtonContent: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 6,
   },
   typeButton: {
     paddingVertical: 10,
