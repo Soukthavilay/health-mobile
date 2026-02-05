@@ -12,6 +12,7 @@ import {
   RefreshControl,
 } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
+import { Ionicons } from '@expo/vector-icons';
 import { useFocusEffect } from '@react-navigation/native';
 import {
   createGoal,
@@ -21,12 +22,12 @@ import {
 } from '../services/api.js';
 
 const GOAL_TYPES = [
-  { id: 'weight_loss', label: '⚖️ Giảm cân', unit: 'kg', defaultTarget: 5 },
-  { id: 'weight_gain', label: '💪 Tăng cân', unit: 'kg', defaultTarget: 3 },
-  { id: 'exercise_days', label: '🏃 Tập luyện', unit: 'ngày/tuần', defaultTarget: 5 },
-  { id: 'water_intake', label: '💧 Uống nước', unit: 'ml/ngày', defaultTarget: 2000 },
-  { id: 'sleep_hours', label: '😴 Giấc ngủ', unit: 'tiếng/đêm', defaultTarget: 8 },
-  { id: 'steps', label: '👟 Bước chân', unit: 'bước/ngày', defaultTarget: 10000 },
+  { id: 'weight_loss', label: 'Giảm cân', icon: 'scale', unit: 'kg', defaultTarget: 5 },
+  { id: 'weight_gain', label: 'Tăng cân', icon: 'barbell', unit: 'kg', defaultTarget: 3 },
+  { id: 'exercise_days', label: 'Tập luyện', icon: 'fitness', unit: 'ngày/tuần', defaultTarget: 5 },
+  { id: 'water_intake', label: 'Uống nước', icon: 'water', unit: 'ml/ngày', defaultTarget: 2000 },
+  { id: 'sleep_hours', label: 'Giấc ngủ', icon: 'moon', unit: 'tiếng/đêm', defaultTarget: 8 },
+  { id: 'steps', label: 'Bước chân', icon: 'walk', unit: 'bước/ngày', defaultTarget: 10000 },
 ];
 
 const PRESET_GOALS = [
@@ -210,15 +211,22 @@ const GoalsScreen = () => {
         contentContainerStyle={styles.container}
         refreshControl={<RefreshControl refreshing={refreshing} onRefresh={onRefresh} colors={['#ff6f00']} />}
       >
-        <Text style={styles.title}>🎯 Mục tiêu</Text>
+        <View style={styles.titleRow}>
+          <Ionicons name="flag" size={28} color="#ff6f00" />
+          <Text style={styles.title}>Mục tiêu</Text>
+        </View>
         <Text style={styles.subtitle}>Đặt mục tiêu và theo dõi tiến độ</Text>
 
         <TouchableOpacity style={styles.primaryButton} onPress={() => setModalVisible(true)}>
-          <Text style={styles.primaryButtonText}>+ Tạo mục tiêu mới</Text>
+          <Ionicons name="add-circle" size={20} color="#fff" style={styles.primaryButtonIcon} />
+          <Text style={styles.primaryButtonText}>Tạo mục tiêu mới</Text>
         </TouchableOpacity>
 
         {/* Active Goals */}
-        <Text style={styles.sectionTitle}>📈 Đang thực hiện ({activeGoals.length})</Text>
+        <View style={styles.sectionTitleRow}>
+          <Ionicons name="trending-up" size={18} color="#333" />
+          <Text style={styles.sectionTitle}>Đang thực hiện ({activeGoals.length})</Text>
+        </View>
         {activeGoals.length === 0 ? (
           <View style={styles.emptyCard}>
             <Text style={styles.emptyText}>Chưa có mục tiêu nào</Text>
@@ -230,7 +238,7 @@ const GoalsScreen = () => {
             return (
               <View key={goal.id} style={styles.goalCard}>
                 <View style={styles.goalHeader}>
-                  <Text style={styles.goalIcon}>{typeInfo.label.split(' ')[0]}</Text>
+                  <Ionicons name={typeInfo.icon} size={24} color="#ff6f00" style={styles.goalIcon} />
                   <View style={styles.goalInfo}>
                     <Text style={styles.goalTitle}>{goal.description}</Text>
                     <Text style={styles.goalMeta}>
@@ -249,12 +257,14 @@ const GoalsScreen = () => {
                     style={styles.updateButton}
                     onPress={() => handleUpdateProgress(goal)}
                   >
+                    <Ionicons name="create" size={16} color="#fff" style={styles.actionIcon} />
                     <Text style={styles.updateButtonText}>Cập nhật</Text>
                   </TouchableOpacity>
                   <TouchableOpacity
                     style={styles.deleteButton}
                     onPress={() => handleDeleteGoal(goal.id)}
                   >
+                    <Ionicons name="trash" size={16} color="#e53935" style={styles.actionIcon} />
                     <Text style={styles.deleteButtonText}>Xóa</Text>
                   </TouchableOpacity>
                 </View>
@@ -266,20 +276,23 @@ const GoalsScreen = () => {
         {/* Completed Goals */}
         {completedGoals.length > 0 && (
           <>
-            <Text style={styles.sectionTitle}>✅ Đã hoàn thành ({completedGoals.length})</Text>
+            <View style={styles.sectionTitleRow}>
+              <Ionicons name="checkmark-done" size={18} color="#333" />
+              <Text style={styles.sectionTitle}>Đã hoàn thành ({completedGoals.length})</Text>
+            </View>
             {completedGoals.map((goal) => {
               const typeInfo = getTypeInfo(goal.type);
               return (
                 <View key={goal.id} style={[styles.goalCard, styles.completedCard]}>
                   <View style={styles.goalHeader}>
-                    <Text style={styles.goalIcon}>{typeInfo.label.split(' ')[0]}</Text>
+                    <Ionicons name={typeInfo.icon} size={24} color="#43a047" style={styles.goalIcon} />
                     <View style={styles.goalInfo}>
                       <Text style={[styles.goalTitle, styles.completedTitle]}>
                         {goal.description}
                       </Text>
-                      <Text style={styles.goalMeta}>🎉 Hoàn thành!</Text>
+                      <Text style={styles.goalMeta}>Hoàn thành!</Text>
                     </View>
-                    <Text style={styles.completedCheck}>✓</Text>
+                    <Ionicons name="checkmark-circle" size={22} color="#43a047" />
                   </View>
                 </View>
               );
@@ -300,7 +313,10 @@ const GoalsScreen = () => {
                 <Text style={styles.modalTitle}>Tạo mục tiêu mới</Text>
 
                 {/* Presets */}
-                <Text style={styles.label}>⚡ Chọn nhanh</Text>
+                <View style={styles.labelRow}>
+                  <Ionicons name="flash" size={16} color="#333" />
+                  <Text style={styles.label}>Chọn nhanh</Text>
+                </View>
                 <View style={styles.presetsGrid}>
                   {PRESET_GOALS.map((preset, index) => (
                     <TouchableOpacity
@@ -330,14 +346,21 @@ const GoalsScreen = () => {
                         setTargetValue(String(type.defaultTarget));
                       }}
                     >
-                      <Text
-                        style={[
-                          styles.typeButtonText,
-                          selectedType.id === type.id && styles.typeButtonTextSelected,
-                        ]}
-                      >
-                        {type.label}
-                      </Text>
+                      <View style={styles.typeButtonContent}>
+                        <Ionicons
+                          name={type.icon}
+                          size={16}
+                          color={selectedType.id === type.id ? '#fff' : '#ff6f00'}
+                        />
+                        <Text
+                          style={[
+                            styles.typeButtonText,
+                            selectedType.id === type.id && styles.typeButtonTextSelected,
+                          ]}
+                        >
+                          {type.label}
+                        </Text>
+                      </View>
                     </TouchableOpacity>
                   ))}
                 </View>

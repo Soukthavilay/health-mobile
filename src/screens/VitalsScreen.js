@@ -13,6 +13,7 @@ import {
   RefreshControl,
 } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
+import { Ionicons } from '@expo/vector-icons';
 import { LineChart } from 'react-native-chart-kit';
 import { useFocusEffect } from '@react-navigation/native';
 import {
@@ -22,10 +23,10 @@ import {
 } from '../services/api.js';
 
 const VITAL_TYPES = [
-  { id: 'heart_rate', label: '❤️ Nhịp tim', unit: 'bpm', normalRange: '60-100' },
-  { id: 'blood_pressure', label: '🩸 Huyết áp', unit: 'mmHg', normalRange: '90/60 - 120/80' },
-  { id: 'spo2', label: '🫁 SpO2', unit: '%', normalRange: '95-100' },
-  { id: 'temperature', label: '🌡️ Thân nhiệt', unit: '°C', normalRange: '36.1-37.2' },
+  { id: 'heart_rate', label: 'Nhịp tim', icon: 'heart', unit: 'bpm', normalRange: '60-100' },
+  { id: 'blood_pressure', label: 'Huyết áp', icon: 'water', unit: 'mmHg', normalRange: '90/60 - 120/80' },
+  { id: 'spo2', label: 'SpO2', icon: 'leaf', unit: '%', normalRange: '95-100' },
+  { id: 'temperature', label: 'Thân nhiệt', icon: 'thermometer', unit: '°C', normalRange: '36.1-37.2' },
 ];
 
 const VitalsScreen = () => {
@@ -203,18 +204,22 @@ const VitalsScreen = () => {
         contentContainerStyle={styles.container}
         refreshControl={<RefreshControl refreshing={refreshing} onRefresh={onRefresh} colors={['#c62828']} />}
       >
-        <Text style={styles.title}>❤️ Chỉ số sinh tồn</Text>
+        <View style={styles.titleRow}>
+          <Ionicons name="pulse" size={28} color="#c62828" />
+          <Text style={styles.title}>Chỉ số sinh tồn</Text>
+        </View>
         <Text style={styles.subtitle}>Theo dõi sức khỏe chi tiết</Text>
 
         <TouchableOpacity style={styles.primaryButton} onPress={() => setModalVisible(true)}>
-          <Text style={styles.primaryButtonText}>+ Ghi nhận chỉ số mới</Text>
+          <Ionicons name="add-circle" size={20} color="#fff" style={styles.primaryButtonIcon} />
+          <Text style={styles.primaryButtonText}>Ghi nhận chỉ số mới</Text>
         </TouchableOpacity>
 
         {/* Vital Cards */}
         <View style={styles.vitalsGrid}>
           {/* Heart Rate */}
           <View style={styles.vitalCard}>
-            <Text style={styles.vitalIcon}>❤️</Text>
+            <Ionicons name="heart" size={24} color="#c62828" style={styles.vitalIcon} />
             <Text style={styles.vitalLabel}>Nhịp tim</Text>
             <Text style={styles.vitalValue}>
               {vitals.latest.heart_rate?.value || '--'} <Text style={styles.vitalUnit}>bpm</Text>
@@ -229,7 +234,7 @@ const VitalsScreen = () => {
 
           {/* Blood Pressure */}
           <View style={styles.vitalCard}>
-            <Text style={styles.vitalIcon}>🩸</Text>
+            <Ionicons name="water" size={24} color="#c62828" style={styles.vitalIcon} />
             <Text style={styles.vitalLabel}>Huyết áp</Text>
             <Text style={styles.vitalValue}>
               {vitals.latest.blood_pressure?.systolic || '--'}/{vitals.latest.blood_pressure?.diastolic || '--'}
@@ -241,7 +246,7 @@ const VitalsScreen = () => {
 
           {/* SpO2 */}
           <View style={styles.vitalCard}>
-            <Text style={styles.vitalIcon}>🫁</Text>
+            <Ionicons name="leaf" size={24} color="#c62828" style={styles.vitalIcon} />
             <Text style={styles.vitalLabel}>SpO2</Text>
             <Text style={styles.vitalValue}>
               {vitals.latest.spo2?.value || '--'} <Text style={styles.vitalUnit}>%</Text>
@@ -251,7 +256,7 @@ const VitalsScreen = () => {
 
           {/* Temperature */}
           <View style={styles.vitalCard}>
-            <Text style={styles.vitalIcon}>🌡️</Text>
+            <Ionicons name="thermometer" size={24} color="#c62828" style={styles.vitalIcon} />
             <Text style={styles.vitalLabel}>Thân nhiệt</Text>
             <Text style={styles.vitalValue}>
               {vitals.latest.temperature?.value || '--'} <Text style={styles.vitalUnit}>°C</Text>
@@ -268,7 +273,10 @@ const VitalsScreen = () => {
         {/* Heart Rate Trend */}
         {vitals.history.heart_rate && (
           <View style={styles.chartCard}>
-            <Text style={styles.chartTitle}>❤️ Xu hướng nhịp tim (7 ngày)</Text>
+            <View style={styles.chartTitleRow}>
+              <Ionicons name="heart" size={18} color="#c62828" />
+              <Text style={styles.chartTitle}>Xu hướng nhịp tim (7 ngày)</Text>
+            </View>
             <LineChart
               data={{
                 labels: vitals.dates,
@@ -294,7 +302,10 @@ const VitalsScreen = () => {
         {/* SpO2 Trend */}
         {vitals.history.spo2 && (
           <View style={styles.chartCard}>
-            <Text style={styles.chartTitle}>🫁 Xu hướng SpO2 (7 ngày)</Text>
+            <View style={styles.chartTitleRow}>
+              <Ionicons name="leaf" size={18} color="#c62828" />
+              <Text style={styles.chartTitle}>Xu hướng SpO2 (7 ngày)</Text>
+            </View>
             <LineChart
               data={{
                 labels: vitals.dates,
@@ -336,9 +347,16 @@ const VitalsScreen = () => {
                     style={[styles.typeButton, selectedType.id === type.id && styles.typeButtonSelected]}
                     onPress={() => setSelectedType(type)}
                   >
-                    <Text style={[styles.typeButtonText, selectedType.id === type.id && styles.typeButtonTextSelected]}>
-                      {type.label}
-                    </Text>
+                    <View style={styles.typeButtonContent}>
+                      <Ionicons
+                        name={type.icon}
+                        size={16}
+                        color={selectedType.id === type.id ? '#fff' : '#c62828'}
+                      />
+                      <Text style={[styles.typeButtonText, selectedType.id === type.id && styles.typeButtonTextSelected]}>
+                        {type.label}
+                      </Text>
+                    </View>
                   </TouchableOpacity>
                 ))}
               </View>

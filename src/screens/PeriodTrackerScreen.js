@@ -12,24 +12,25 @@ import {
 } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { useFocusEffect } from '@react-navigation/native';
+import { Ionicons } from '@expo/vector-icons';
 import { getPeriodLogs, getPeriodPredictions, logPeriod } from '../services/api.js';
 
 const SYMPTOMS = [
-  { id: 'cramps', label: '😣 Đau bụng' },
-  { id: 'headache', label: '🤕 Đau đầu' },
-  { id: 'bloating', label: '🫃 Đầy hơi' },
-  { id: 'fatigue', label: '😴 Mệt mỏi' },
-  { id: 'mood', label: '😤 Thay đổi tâm trạng' },
-  { id: 'acne', label: '😔 Mụn' },
+  { id: 'cramps', label: 'Đau bụng' },
+  { id: 'headache', label: 'Đau đầu' },
+  { id: 'bloating', label: 'Đầy hơi' },
+  { id: 'fatigue', label: 'Mệt mỏi' },
+  { id: 'mood', label: 'Thay đổi tâm trạng' },
+  { id: 'acne', label: 'Mụn' },
 ];
 
 const MOODS = [
-  { id: 'happy', label: '😊 Vui vẻ' },
-  { id: 'calm', label: '😌 Bình tĩnh' },
-  { id: 'sad', label: '😢 Buồn' },
-  { id: 'anxious', label: '😰 Lo lắng' },
-  { id: 'irritable', label: '😤 Cáu gắt' },
-  { id: 'sensitive', label: '🥺 Nhạy cảm' },
+  { id: 'happy', label: 'Vui vẻ' },
+  { id: 'calm', label: 'Bình tĩnh' },
+  { id: 'sad', label: 'Buồn' },
+  { id: 'anxious', label: 'Lo lắng' },
+  { id: 'irritable', label: 'Cáu gắt' },
+  { id: 'sensitive', label: 'Nhạy cảm' },
 ];
 
 const PeriodTrackerScreen = () => {
@@ -112,15 +113,15 @@ const PeriodTrackerScreen = () => {
     if (daysUntil === null) return null;
     
     if (daysUntil <= 0 && daysUntil > -(cycleData?.periodLength || 5)) {
-      return { phase: 'Kinh nguyệt', color: '#e91e63', icon: '🩸' };
+      return { phase: 'Kinh nguyệt', color: '#e91e63', icon: 'water' };
     }
     if (daysUntil > 0 && daysUntil <= 7) {
-      return { phase: 'Trước kỳ kinh (PMS)', color: '#ff9800', icon: '⚠️' };
+      return { phase: 'Trước kỳ kinh (PMS)', color: '#ff9800', icon: 'warning' };
     }
     if (daysUntil > 7 && daysUntil <= 14) {
-      return { phase: 'Giai đoạn nang trứng', color: '#4caf50', icon: '🌱' };
+      return { phase: 'Giai đoạn nang trứng', color: '#4caf50', icon: 'leaf' };
     }
-    return { phase: 'Giai đoạn rụng trứng', color: '#9c27b0', icon: '✨' };
+    return { phase: 'Giai đoạn rụng trứng', color: '#9c27b0', icon: 'sparkles' };
   };
 
   const formatDate = (dateStr) => {
@@ -185,13 +186,16 @@ const PeriodTrackerScreen = () => {
         contentContainerStyle={styles.container}
         refreshControl={<RefreshControl refreshing={refreshing} onRefresh={onRefresh} colors={['#ad1457']} />}
       >
-        <Text style={styles.title}>🌸 Theo dõi kinh nguyệt</Text>
+        <View style={styles.titleRow}>
+          <Ionicons name="flower" size={28} color="#ad1457" />
+          <Text style={styles.title}>Theo dõi kinh nguyệt</Text>
+        </View>
         <Text style={styles.subtitle}>Dự đoán và ghi nhận chu kỳ</Text>
 
         {/* Current Phase Card */}
         {phase && (
           <View style={[styles.phaseCard, { borderColor: phase.color }]}>
-            <Text style={styles.phaseIcon}>{phase.icon}</Text>
+            <Ionicons name={phase.icon} size={34} color={phase.color} style={styles.phaseIcon} />
             <Text style={[styles.phaseName, { color: phase.color }]}>{phase.phase}</Text>
             
             {daysUntil !== null && daysUntil > 0 && (
@@ -210,7 +214,10 @@ const PeriodTrackerScreen = () => {
         {/* Next Period Prediction */}
         {nextPeriod && (
           <View style={styles.predictionCard}>
-            <Text style={styles.predictionLabel}>📅 Dự đoán kỳ kinh tiếp theo</Text>
+            <View style={styles.predictionLabelRow}>
+              <Ionicons name="calendar" size={16} color="#666" />
+              <Text style={styles.predictionLabel}>Dự đoán kỳ kinh tiếp theo</Text>
+            </View>
             <Text style={styles.predictionDate}>
               {nextPeriod.toLocaleDateString('vi-VN', { day: '2-digit', month: 'long', year: 'numeric' })}
             </Text>
@@ -223,19 +230,22 @@ const PeriodTrackerScreen = () => {
         {/* Action Buttons */}
         <View style={styles.actionsRow}>
           <TouchableOpacity style={styles.actionButton} onPress={handleStartPeriod}>
-            <Text style={styles.actionIcon}>🩸</Text>
+            <Ionicons name="water" size={22} color="#ad1457" style={styles.actionIcon} />
             <Text style={styles.actionText}>Bắt đầu{'\n'}kỳ kinh</Text>
           </TouchableOpacity>
           
           <TouchableOpacity style={styles.actionButton} onPress={() => setLogModalVisible(true)}>
-            <Text style={styles.actionIcon}>📝</Text>
+            <Ionicons name="create" size={22} color="#ad1457" style={styles.actionIcon} />
             <Text style={styles.actionText}>Ghi{'\n'}triệu chứng</Text>
           </TouchableOpacity>
         </View>
 
         {/* Cycle Info */}
         <View style={styles.infoCard}>
-          <Text style={styles.infoTitle}>📊 Thống kê chu kỳ</Text>
+          <View style={styles.sectionTitleRow}>
+            <Ionicons name="stats-chart" size={18} color="#ad1457" />
+            <Text style={styles.infoTitle}>Thống kê chu kỳ</Text>
+          </View>
           <View style={styles.infoRow}>
             <View style={styles.infoItem}>
               <Text style={styles.infoValue}>{cycleData.cycleLength}</Text>
@@ -254,7 +264,10 @@ const PeriodTrackerScreen = () => {
 
         {/* Cycle History */}
         <View style={styles.historyCard}>
-          <Text style={styles.historyTitle}>📜 Lịch sử chu kỳ</Text>
+          <View style={styles.sectionTitleRow}>
+            <Ionicons name="time" size={18} color="#ad1457" />
+            <Text style={styles.historyTitle}>Lịch sử chu kỳ</Text>
+          </View>
           {cycleData.cycles.map((cycle, index) => (
             <View key={index} style={styles.historyRow}>
               <Text style={styles.historyDate}>{formatDate(cycle.start)} - {formatDate(cycle.end)}</Text>
@@ -265,7 +278,10 @@ const PeriodTrackerScreen = () => {
 
         {/* Tips */}
         <View style={styles.tipsCard}>
-          <Text style={styles.tipsTitle}>💡 Mẹo theo giai đoạn</Text>
+          <View style={styles.tipsTitleRow}>
+            <Ionicons name="bulb" size={18} color="#f57f17" />
+            <Text style={styles.tipsTitle}>Mẹo theo giai đoạn</Text>
+          </View>
           {phase?.phase === 'Kinh nguyệt' && (
             <Text style={styles.tipText}>
               • Nghỉ ngơi nhiều hơn{'\n'}
@@ -322,7 +338,7 @@ const PeriodTrackerScreen = () => {
                       onPress={() => setFlowLevel(level)}
                     >
                       <Text style={styles.flowText}>
-                        {'💧'.repeat(level)}
+                        {String(level)}
                       </Text>
                       <Text style={[styles.flowLabel, flowLevel === level && styles.flowLabelSelected]}>
                         {level === 1 ? 'Nhẹ' : level === 2 ? 'TB' : 'Nhiều'}

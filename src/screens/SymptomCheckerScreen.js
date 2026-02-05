@@ -10,7 +10,23 @@ import {
 } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { useFocusEffect } from '@react-navigation/native';
+import { Ionicons } from '@expo/vector-icons';
 import { getBodyParts, checkSymptoms } from '../services/api.js';
+
+const getPartIconName = (id) => {
+  switch (id) {
+    case 'head':
+      return 'skull-outline';
+    case 'chest':
+      return 'heart-outline';
+    case 'stomach':
+      return 'nutrition-outline';
+    case 'general':
+      return 'body-outline';
+    default:
+      return 'accessibility-outline';
+  }
+};
 
 const SymptomCheckerScreen = () => {
   const [step, setStep] = useState(1); // 1: select parts, 2: select symptoms, 3: results
@@ -31,7 +47,7 @@ const SymptomCheckerScreen = () => {
             const transformed = data.map((bp) => ({
               id: bp.id,
               name: bp.name,
-              label: `${bp.icon || '🏥'} ${bp.name}`,
+              iconName: getPartIconName(bp.id),
               symptoms: (bp.symptoms || []).map((s) => ({
                 id: s.id,
                 name: s.name,
@@ -42,10 +58,10 @@ const SymptomCheckerScreen = () => {
           } else {
             // Fallback to default body parts
             setBodyParts([
-              { id: 'head', name: 'Đầu', label: '🧠 Đầu', symptoms: [{ id: 1, name: 'Đau đầu', label: 'Đau đầu' }] },
-              { id: 'chest', name: 'Ngực', label: '💗 Ngực', symptoms: [{ id: 2, name: 'Đau ngực', label: 'Đau ngực' }] },
-              { id: 'stomach', name: 'Bụng', label: '🫃 Bụng', symptoms: [{ id: 3, name: 'Đau bụng', label: 'Đau bụng' }] },
-              { id: 'general', name: 'Toàn thân', label: '🌡️ Toàn thân', symptoms: [{ id: 4, name: 'Sốt', label: 'Sốt' }] },
+              { id: 'head', name: 'Đầu', iconName: getPartIconName('head'), symptoms: [{ id: 1, name: 'Đau đầu', label: 'Đau đầu' }] },
+              { id: 'chest', name: 'Ngực', iconName: getPartIconName('chest'), symptoms: [{ id: 2, name: 'Đau ngực', label: 'Đau ngực' }] },
+              { id: 'stomach', name: 'Bụng', iconName: getPartIconName('stomach'), symptoms: [{ id: 3, name: 'Đau bụng', label: 'Đau bụng' }] },
+              { id: 'general', name: 'Toàn thân', iconName: getPartIconName('general'), symptoms: [{ id: 4, name: 'Sốt', label: 'Sốt' }] },
             ]);
           }
         } catch (error) {
@@ -82,12 +98,21 @@ const SymptomCheckerScreen = () => {
           duration_days: 1,
           severity: 'moderate',
         });
-        
+
+        const resultColor = apiResult.severity === 'high' ? '#e53935' : apiResult.severity === 'medium' ? '#fb8c00' : '#43a047';
+
         // Transform API result
         const transformedResult = {
           severity: apiResult.severity || 'low',
-          color: apiResult.severity === 'high' ? '#e53935' : apiResult.severity === 'medium' ? '#fb8c00' : '#43a047',
-          title: apiResult.title || '📝 Kết quả phân tích',
+          color: resultColor,
+          title: (
+            <View style={{ flexDirection: 'row', alignItems: 'center' }}>
+              <Ionicons name="medkit" size={20} color={resultColor} />
+              <Text style={{ fontSize: 18, fontWeight: '800', color: resultColor, marginLeft: 8 }}>
+                {apiResult.title || 'Kết quả phân tích'}
+              </Text>
+            </View>
+          ),
           message: apiResult.advice || apiResult.message || 'Triệu chứng của bạn đã được ghi nhận.',
           actions: apiResult.recommendations || apiResult.actions || ['Nghỉ ngơi', 'Theo dõi triệu chứng', 'Đi khám nếu tồi tệ hơn'],
           conditions: apiResult.conditions || [],
@@ -130,7 +155,10 @@ const SymptomCheckerScreen = () => {
   return (
     <SafeAreaView style={styles.safeArea} edges={['top', 'bottom']}>
       <ScrollView contentContainerStyle={styles.container}>
-        <Text style={styles.title}>🩺 Kiểm tra triệu chứng</Text>
+        <View style={styles.titleRow}>
+          <Ionicons name="medkit" size={28} color="#1565c0" />
+          <Text style={styles.title}>Kiểm tra triệu chứng</Text>
+        </View>
         <Text style={styles.subtitle}>Mô tả triệu chứng để nhận gợi ý</Text>
 
         {/* Progress */}
@@ -153,7 +181,10 @@ const SymptomCheckerScreen = () => {
                   style={styles.partButton}
                   onPress={() => handleSelectPart(part)}
                 >
-                  <Text style={styles.partText}>{part.label}</Text>
+                  <View style={styles.partRow}>
+                    <Ionicons name={part.iconName || getPartIconName(part.id)} size={18} color="#1565c0" />
+                    <Text style={styles.partText}>{part.name}</Text>
+                  </View>
                 </TouchableOpacity>
               ))}
             </View>
@@ -163,7 +194,7 @@ const SymptomCheckerScreen = () => {
         {/* Step 2: Symptoms */}
         {step === 2 && selectedPart && (
           <>
-            <Text style={styles.stepTitle}>Bước 2: Chọn triệu chứng ({selectedPart.label})</Text>
+            <Text style={styles.stepTitle}>Bước 2: Chọn triệu chứng ({selectedPart.name})</Text>
             
             <View style={styles.symptomsGrid}>
               {(selectedPart.symptoms || []).map((symptom) => {
@@ -210,7 +241,10 @@ const SymptomCheckerScreen = () => {
               <Text style={[styles.resultTitle, { color: result.color }]}>{result.title}</Text>
               <Text style={styles.resultMessage}>{result.message}</Text>
               
-              <Text style={styles.actionsTitle}>📋 Khuyến nghị:</Text>
+              <View style={styles.actionsTitleRow}>
+                <Ionicons name="list" size={16} color="#333" />
+                <Text style={styles.actionsTitle}>Khuyến nghị:</Text>
+              </View>
               {result.actions.map((action, index) => (
                 <Text key={index} style={styles.actionItem}>• {action}</Text>
               ))}
@@ -218,8 +252,7 @@ const SymptomCheckerScreen = () => {
 
             <View style={styles.disclaimer}>
               <Text style={styles.disclaimerText}>
-                ⚠️ Lưu ý: Đây chỉ là gợi ý tham khảo, không thay thế chẩn đoán của bác sĩ. 
-                Nếu triệu chứng nặng hoặc kéo dài, hãy đến cơ sở y tế.
+                Lưu ý: Đây chỉ là gợi ý tham khảo, không thay thế chẩn đoán của bác sĩ. Nếu triệu chứng nặng hoặc kéo dài, hãy đến cơ sở y tế.
               </Text>
             </View>
 
@@ -283,6 +316,11 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     flexWrap: 'wrap',
     gap: 10,
+  },
+  partRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 8,
   },
   partButton: {
     width: '48%',

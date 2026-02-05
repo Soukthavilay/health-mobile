@@ -12,6 +12,7 @@ import {
 } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { LineChart } from 'react-native-chart-kit';
+import { Ionicons } from '@expo/vector-icons';
 
 const getMockData = () => ({
   bloodPressure: {
@@ -106,7 +107,7 @@ const BloodSugarScreen = () => {
     setDiastolic('');
     setPulse('');
     setBpModalVisible(false);
-    Alert.alert('✅ Đã lưu', 'Huyết áp đã được ghi nhận');
+    Alert.alert('Đã lưu', 'Huyết áp đã được ghi nhận');
   };
 
   const handleSaveSugar = () => {
@@ -128,7 +129,7 @@ const BloodSugarScreen = () => {
 
     setSugarValue('');
     setSugarModalVisible(false);
-    Alert.alert('✅ Đã lưu', 'Đường huyết đã được ghi nhận');
+    Alert.alert('Đã lưu', 'Đường huyết đã được ghi nhận');
   };
 
   const formatTime = (isoString) => {
@@ -143,7 +144,10 @@ const BloodSugarScreen = () => {
   return (
     <SafeAreaView style={styles.safeArea} edges={['top', 'bottom']}>
       <ScrollView contentContainerStyle={styles.container}>
-        <Text style={styles.title}>🩺 Huyết áp & Đường huyết</Text>
+        <View style={styles.titleRow}>
+          <Ionicons name="pulse" size={28} color="#1565c0" />
+          <Text style={styles.title}>Huyết áp & Đường huyết</Text>
+        </View>
         <Text style={styles.subtitle}>Theo dõi chỉ số quan trọng</Text>
 
         {/* Tab Selector */}
@@ -152,13 +156,19 @@ const BloodSugarScreen = () => {
             style={[styles.tab, activeTab === 'bp' && styles.tabActive]}
             onPress={() => setActiveTab('bp')}
           >
-            <Text style={[styles.tabText, activeTab === 'bp' && styles.tabTextActive]}>🩸 Huyết áp</Text>
+            <View style={styles.tabContent}>
+              <Ionicons name="water" size={16} color={activeTab === 'bp' ? '#fff' : '#666'} />
+              <Text style={[styles.tabText, activeTab === 'bp' && styles.tabTextActive]}>Huyết áp</Text>
+            </View>
           </TouchableOpacity>
           <TouchableOpacity
             style={[styles.tab, activeTab === 'sugar' && styles.tabActive]}
             onPress={() => setActiveTab('sugar')}
           >
-            <Text style={[styles.tabText, activeTab === 'sugar' && styles.tabTextActive]}>🍬 Đường huyết</Text>
+            <View style={styles.tabContent}>
+              <Ionicons name="nutrition" size={16} color={activeTab === 'sugar' ? '#fff' : '#666'} />
+              <Text style={[styles.tabText, activeTab === 'sugar' && styles.tabTextActive]}>Đường huyết</Text>
+            </View>
           </TouchableOpacity>
         </View>
 
@@ -189,7 +199,10 @@ const BloodSugarScreen = () => {
 
             {/* Chart */}
             <View style={styles.chartCard}>
-              <Text style={styles.chartTitle}>📈 Xu hướng 7 ngày</Text>
+              <View style={styles.sectionTitleRow}>
+                <Ionicons name="analytics" size={16} color="#1565c0" />
+                <Text style={styles.chartTitle}>Xu hướng 7 ngày</Text>
+              </View>
               <LineChart
                 data={{
                   labels: data.dates,
@@ -216,7 +229,10 @@ const BloodSugarScreen = () => {
 
             {/* History */}
             <View style={styles.historyCard}>
-              <Text style={styles.historyTitle}>📜 Lịch sử</Text>
+              <View style={styles.sectionTitleRowDark}>
+                <Ionicons name="time" size={16} color="#333" />
+                <Text style={styles.historyTitle}>Lịch sử</Text>
+              </View>
               {data.bloodPressure.history.map((record, index) => (
                 <View key={index} style={styles.historyRow}>
                   <Text style={styles.historyValue}>{record.systolic}/{record.diastolic}</Text>
@@ -251,7 +267,10 @@ const BloodSugarScreen = () => {
 
             {/* Chart */}
             <View style={styles.chartCard}>
-              <Text style={styles.chartTitle}>📈 Xu hướng 7 ngày</Text>
+              <View style={styles.sectionTitleRow}>
+                <Ionicons name="analytics" size={16} color="#7b1fa2" />
+                <Text style={[styles.chartTitle, styles.chartTitleSugar]}>Xu hướng 7 ngày</Text>
+              </View>
               <LineChart
                 data={{
                   labels: data.dates,
@@ -275,16 +294,22 @@ const BloodSugarScreen = () => {
 
             {/* Reference */}
             <View style={styles.referenceCard}>
-              <Text style={styles.referenceTitle}>📋 Mức tham khảo</Text>
-              <Text style={styles.referenceText}>🟢 Đói bình thường: &lt; 100 mg/dL</Text>
-              <Text style={styles.referenceText}>🟡 Tiền tiểu đường: 100-125 mg/dL</Text>
-              <Text style={styles.referenceText}>🔴 Tiểu đường: ≥ 126 mg/dL</Text>
+              <View style={styles.sectionTitleRow}>
+                <Ionicons name="list" size={16} color="#7b1fa2" />
+                <Text style={styles.referenceTitle}>Mức tham khảo</Text>
+              </View>
+              <Text style={styles.referenceText}>Đói bình thường: &lt; 100 mg/dL</Text>
+              <Text style={styles.referenceText}>Tiền tiểu đường: 100-125 mg/dL</Text>
+              <Text style={styles.referenceText}>Tiểu đường: ≥ 126 mg/dL</Text>
               <Text style={styles.referenceTextSmall}>※ Sau ăn 2h bình thường: &lt; 140 mg/dL</Text>
             </View>
 
             {/* History */}
             <View style={styles.historyCard}>
-              <Text style={styles.historyTitle}>📜 Lịch sử</Text>
+              <View style={styles.sectionTitleRowDark}>
+                <Ionicons name="time" size={16} color="#333" />
+                <Text style={styles.historyTitle}>Lịch sử</Text>
+              </View>
               {data.bloodSugar.history.map((record, index) => (
                 <View key={index} style={styles.historyRow}>
                   <Text style={styles.historyValue}>{record.value} mg/dL</Text>
@@ -368,6 +393,10 @@ const styles = StyleSheet.create({
   container: { padding: 16, flexGrow: 1 },
   title: { fontSize: 28, fontWeight: '800', color: '#1565c0', marginBottom: 4 },
   subtitle: { fontSize: 16, color: '#444', marginBottom: 16 },
+  titleRow: { flexDirection: 'row', alignItems: 'center', gap: 10, marginBottom: 4 },
+  tabContent: { flexDirection: 'row', alignItems: 'center', gap: 8 },
+  sectionTitleRow: { flexDirection: 'row', alignItems: 'center', gap: 8 },
+  sectionTitleRowDark: { flexDirection: 'row', alignItems: 'center', gap: 8, marginBottom: 12 },
   tabRow: { flexDirection: 'row', backgroundColor: '#e0e0e0', borderRadius: 12, padding: 4, marginBottom: 16 },
   tab: { flex: 1, paddingVertical: 10, borderRadius: 10, alignItems: 'center' },
   tabActive: { backgroundColor: '#1565c0' },
@@ -385,8 +414,9 @@ const styles = StyleSheet.create({
   recordTime: { fontSize: 12, color: '#999', marginTop: 4 },
   chartCard: { backgroundColor: '#fff', borderRadius: 14, padding: 16, marginBottom: 16, borderWidth: 1, borderColor: '#1565c0' },
   chartTitle: { fontSize: 16, fontWeight: '700', color: '#1565c0' },
+  chartTitleSugar: { color: '#7b1fa2' },
   historyCard: { backgroundColor: '#fff', borderRadius: 14, padding: 16, marginBottom: 16 },
-  historyTitle: { fontSize: 16, fontWeight: '800', color: '#333', marginBottom: 12 },
+  historyTitle: { fontSize: 16, fontWeight: '800', color: '#333' },
   historyRow: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', paddingVertical: 10, borderBottomWidth: 1, borderBottomColor: '#eee' },
   historyValue: { fontSize: 16, fontWeight: '700', color: '#333' },
   historyType: { fontSize: 12, color: '#7b1fa2', fontWeight: '600' },

@@ -12,6 +12,7 @@ import {
   RefreshControl,
 } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
+import { Ionicons } from '@expo/vector-icons';
 import { BarChart } from 'react-native-chart-kit';
 import { useFocusEffect } from '@react-navigation/native';
 import {
@@ -22,10 +23,10 @@ import {
 } from '../services/api.js';
 
 const QUALITY_OPTIONS = [
-  { id: 'poor', label: '😴 Kém', color: '#e53935' },
-  { id: 'fair', label: '😐 Tạm', color: '#fb8c00' },
-  { id: 'good', label: '😊 Tốt', color: '#43a047' },
-  { id: 'excellent', label: '🌟 Tuyệt', color: '#1e88e5' },
+  { id: 'poor', label: 'Kém', icon: 'alert-circle', color: '#e53935' },
+  { id: 'fair', label: 'Tạm', icon: 'remove-circle', color: '#fb8c00' },
+  { id: 'good', label: 'Tốt', icon: 'happy', color: '#43a047' },
+  { id: 'excellent', label: 'Tuyệt', icon: 'star', color: '#1e88e5' },
 ];
 
 const SleepScreen = () => {
@@ -68,8 +69,10 @@ const SleepScreen = () => {
         const dayLog = logsResult?.find((log) =>
           log.wake_time?.startsWith(dateStr)
         );
+        const day = String(d.getDate()).padStart(2, '0');
+        const month = String(d.getMonth() + 1).padStart(2, '0');
         last7Days.push({
-          date: d.toLocaleDateString('vi-VN', { day: '2-digit', month: '2-digit' }),
+          date: `${day}/${month}`,
           hours: dayLog?.duration_hours || 0,
         });
       }
@@ -186,8 +189,10 @@ const SleepScreen = () => {
 
   const getQualityLabel = (q) => QUALITY_OPTIONS.find((opt) => opt.id === q)?.label || q;
 
+  const getQualityIcon = (q) => QUALITY_OPTIONS.find((opt) => opt.id === q)?.icon || 'help-circle';
+
   const getSleepAdvice = (hours) => {
-    if (hours >= 7 && hours <= 9) return { text: 'Thời gian ngủ lý tưởng! 👍', color: '#43a047' };
+    if (hours >= 7 && hours <= 9) return { text: 'Thời gian ngủ lý tưởng!', color: '#43a047' };
     if (hours >= 6 && hours < 7) return { text: 'Nên ngủ thêm 1 tiếng', color: '#fb8c00' };
     if (hours < 6) return { text: 'Thiếu ngủ! Cần ngủ đủ 7-8 tiếng', color: '#e53935' };
     return { text: 'Ngủ hơi nhiều, 7-9 tiếng là đủ', color: '#1e88e5' };
@@ -252,7 +257,10 @@ const SleepScreen = () => {
         contentContainerStyle={styles.container}
         refreshControl={<RefreshControl refreshing={refreshing} onRefresh={onRefresh} colors={['#673ab7']} />}
       >
-        <Text style={styles.title}>😴 Giấc ngủ</Text>
+        <View style={styles.titleRow}>
+          <Ionicons name="moon" size={28} color="#673ab7" />
+          <Text style={styles.title}>Giấc ngủ</Text>
+        </View>
         <Text style={styles.subtitle}>Theo dõi chất lượng giấc ngủ</Text>
 
         {/* Average Card */}
@@ -264,17 +272,21 @@ const SleepScreen = () => {
 
         {/* Log Sleep Button */}
         <TouchableOpacity style={styles.primaryButton} onPress={() => setModalVisible(true)}>
-          <Text style={styles.primaryButtonText}>+ Ghi nhận giấc ngủ đêm qua</Text>
+          <Ionicons name="add-circle" size={20} color="#fff" style={styles.primaryButtonIcon} />
+          <Text style={styles.primaryButtonText}>Ghi nhận giấc ngủ đêm qua</Text>
         </TouchableOpacity>
 
         {/* Weekly Chart */}
         {weeklyData.length > 0 && (
           <View style={styles.card}>
-            <Text style={styles.cardTitle}>📊 7 ngày gần nhất (giờ)</Text>
+            <View style={styles.cardTitleRow}>
+              <Ionicons name="bar-chart" size={18} color="#673ab7" />
+              <Text style={styles.cardTitle}>7 ngày gần nhất (giờ)</Text>
+            </View>
             <BarChart
               data={chartData}
               width={Dimensions.get('window').width - 64}
-              height={160}
+              height={190}
               yAxisSuffix="h"
               chartConfig={{
                 backgroundColor: '#fff',
@@ -283,10 +295,14 @@ const SleepScreen = () => {
                 decimalPlaces: 1,
                 color: (opacity = 1) => `rgba(103, 58, 183, ${opacity})`,
                 labelColor: () => '#333',
-                barPercentage: 0.6,
+                barPercentage: 0.5,
+                propsForLabels: {
+                  fontSize: 11,
+                },
               }}
               style={{ marginTop: 8, borderRadius: 12 }}
               showValuesOnTopOfBars
+              fromZero
             />
             <View style={styles.goalLine}>
               <Text style={styles.goalLineText}>Mục tiêu: 7-8 tiếng/đêm</Text>
@@ -296,7 +312,10 @@ const SleepScreen = () => {
 
         {/* Sleep Tips */}
         <View style={styles.tipsCard}>
-          <Text style={styles.cardTitle}>💡 Mẹo ngủ ngon</Text>
+          <View style={styles.cardTitleRowTips}>
+            <Ionicons name="bulb" size={18} color="#f9a825" />
+            <Text style={styles.cardTitleTips}>Mẹo ngủ ngon</Text>
+          </View>
           <Text style={styles.tipText}>• Đi ngủ và thức dậy cùng giờ mỗi ngày</Text>
           <Text style={styles.tipText}>• Tránh caffeine sau 2 giờ chiều</Text>
           <Text style={styles.tipText}>• Tắt màn hình 30 phút trước khi ngủ</Text>
@@ -305,7 +324,10 @@ const SleepScreen = () => {
 
         {/* Sleep History */}
         <View style={styles.card}>
-          <Text style={styles.cardTitle}>📝 Lịch sử giấc ngủ</Text>
+          <View style={styles.cardTitleRow}>
+            <Ionicons name="list" size={18} color="#673ab7" />
+            <Text style={styles.cardTitle}>Lịch sử giấc ngủ</Text>
+          </View>
           {sleepLogs.length === 0 ? (
             <Text style={styles.emptyText}>Chưa có dữ liệu</Text>
           ) : (
@@ -323,7 +345,10 @@ const SleepScreen = () => {
                 </View>
                 <View style={styles.logStats}>
                   <Text style={styles.logDuration}>{log.duration_hours}h</Text>
-                  <Text style={styles.logQuality}>{getQualityLabel(log.quality)}</Text>
+                  <View style={styles.qualityInline}>
+                    <Ionicons name={getQualityIcon(log.quality)} size={14} color="#673ab7" />
+                    <Text style={styles.logQuality}>{getQualityLabel(log.quality)}</Text>
+                  </View>
                 </View>
               </TouchableOpacity>
             ))
@@ -359,7 +384,7 @@ const SleepScreen = () => {
               />
 
               <Text style={styles.durationPreview}>
-                ⏱ Tổng: {calculateDuration().toFixed(1)} tiếng
+                Tổng: {calculateDuration().toFixed(1)} tiếng
               </Text>
 
               <Text style={styles.fieldLabel}>Chất lượng giấc ngủ</Text>
@@ -373,11 +398,16 @@ const SleepScreen = () => {
                     ]}
                     onPress={() => setQuality(opt.id)}
                   >
-                    <Text
-                      style={[styles.qualityButtonText, quality === opt.id && { color: '#fff' }]}
-                    >
-                      {opt.label}
-                    </Text>
+                    <View style={styles.qualityButtonContent}>
+                      <Ionicons
+                        name={opt.icon}
+                        size={16}
+                        color={quality === opt.id ? '#fff' : '#673ab7'}
+                      />
+                      <Text style={[styles.qualityButtonText, quality === opt.id && { color: '#fff' }]}>
+                        {opt.label}
+                      </Text>
+                    </View>
                   </TouchableOpacity>
                 ))}
               </View>
@@ -410,11 +440,16 @@ const styles = StyleSheet.create({
     padding: 16,
     flexGrow: 1,
   },
+  titleRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 10,
+    marginBottom: 4,
+  },
   title: {
     fontSize: 28,
     fontWeight: '800',
     color: '#673ab7',
-    marginBottom: 4,
   },
   subtitle: {
     fontSize: 16,
@@ -450,7 +485,13 @@ const styles = StyleSheet.create({
     paddingVertical: 16,
     borderRadius: 12,
     alignItems: 'center',
+    flexDirection: 'row',
+    justifyContent: 'center',
+    gap: 8,
     marginBottom: 16,
+  },
+  primaryButtonIcon: {
+    marginRight: 2,
   },
   primaryButtonText: {
     color: '#fff',
@@ -473,11 +514,27 @@ const styles = StyleSheet.create({
     borderWidth: 1,
     borderColor: '#f9a825',
   },
+  cardTitleRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 8,
+    marginBottom: 12,
+  },
+  cardTitleRowTips: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 8,
+    marginBottom: 12,
+  },
   cardTitle: {
     fontSize: 18,
     fontWeight: '800',
     color: '#673ab7',
-    marginBottom: 12,
+  },
+  cardTitleTips: {
+    fontSize: 18,
+    fontWeight: '800',
+    color: '#f9a825',
   },
   goalLine: {
     marginTop: 8,
@@ -532,6 +589,12 @@ const styles = StyleSheet.create({
   logQuality: {
     fontSize: 12,
     color: '#666',
+  },
+  qualityInline: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 6,
+    marginTop: 2,
   },
   hintText: {
     fontSize: 12,
@@ -628,6 +691,11 @@ const styles = StyleSheet.create({
     borderWidth: 2,
     borderColor: '#673ab7',
     alignItems: 'center',
+  },
+  qualityButtonContent: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 6,
   },
   qualityButtonText: {
     fontSize: 12,

@@ -10,6 +10,7 @@ import {
   RefreshControl,
 } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
+import { Ionicons } from '@expo/vector-icons';
 import { BarChart } from 'react-native-chart-kit';
 import { useFocusEffect } from '@react-navigation/native';
 import { getWeeklyReport, getMonthlyReport } from '../services/api.js';
@@ -126,10 +127,10 @@ const ReportsScreen = () => {
 
   const getInsightIcon = (type) => {
     switch (type) {
-      case 'positive': return '✅';
-      case 'warning': return '⚠️';
-      case 'tip': return '💡';
-      default: return '📝';
+      case 'positive': return 'checkmark-circle';
+      case 'warning': return 'warning';
+      case 'tip': return 'bulb';
+      default: return 'document-text';
     }
   };
 
@@ -152,7 +153,10 @@ const ReportsScreen = () => {
         contentContainerStyle={styles.container}
         refreshControl={<RefreshControl refreshing={refreshing} onRefresh={onRefresh} colors={['#1976d2']} />}
       >
-        <Text style={styles.title}>📈 Báo cáo</Text>
+        <View style={styles.titleRow}>
+          <Ionicons name="bar-chart" size={28} color="#1976d2" />
+          <Text style={styles.title}>Báo cáo</Text>
+        </View>
         <Text style={styles.subtitle}>Phân tích xu hướng sức khỏe</Text>
 
         {/* Tab Selector */}
@@ -180,31 +184,32 @@ const ReportsScreen = () => {
         {/* Summary Cards */}
         <View style={styles.summaryGrid}>
           <View style={styles.summaryCard}>
-            <Text style={styles.summaryIcon}>💧</Text>
+            <Ionicons name="water" size={22} color="#4da6ff" style={styles.summaryIcon} />
             <Text style={styles.summaryValue}>{data.summary.water.avg}ml</Text>
             <Text style={styles.summaryLabel}>TB nước/ngày</Text>
             <Text style={styles.summaryMeta}>{data.summary.water.compliance}% đạt mục tiêu</Text>
           </View>
 
           <View style={styles.summaryCard}>
-            <Text style={styles.summaryIcon}>🏃</Text>
+            <Ionicons name="fitness" size={22} color="#2e7d32" style={styles.summaryIcon} />
             <Text style={styles.summaryValue}>{data.summary.exercise.sessions}</Text>
             <Text style={styles.summaryLabel}>buổi tập</Text>
             <Text style={styles.summaryMeta}>{data.summary.exercise.totalMin} phút</Text>
           </View>
 
           <View style={styles.summaryCard}>
-            <Text style={styles.summaryIcon}>😴</Text>
+            <Ionicons name="moon" size={22} color="#673ab7" style={styles.summaryIcon} />
             <Text style={styles.summaryValue}>{data.summary.sleep.avg}h</Text>
             <Text style={styles.summaryLabel}>TB giấc ngủ</Text>
             <Text style={styles.summaryMeta}>{data.summary.sleep.quality}</Text>
           </View>
 
           <View style={styles.summaryCard}>
-            <Text style={styles.summaryIcon}>⚖️</Text>
+            <Ionicons name="scale" size={22} color="#666" style={styles.summaryIcon} />
             <Text style={styles.summaryValue}>{data.summary.bmi.current}</Text>
             <Text style={styles.summaryLabel}>BMI hiện tại</Text>
-            <Text style={[styles.summaryMeta, { color: data.summary.bmi.change < 0 ? '#43a047' : '#e53935' }]}>
+            <Text style={[styles.summaryMeta, { color: data.summary.bmi.change < 0 ? '#43a047' : '#e53935' }]}
+            >
               {data.summary.bmi.change > 0 ? '+' : ''}{data.summary.bmi.change}
             </Text>
           </View>
@@ -213,7 +218,10 @@ const ReportsScreen = () => {
         {/* Weekly Charts */}
         {activeTab === 'weekly' && weeklyData?.waterTrend && (
           <View style={styles.chartCard}>
-            <Text style={styles.chartTitle}>💧 Xu hướng uống nước</Text>
+            <View style={styles.chartTitleRow}>
+              <Ionicons name="water" size={18} color="#4da6ff" />
+              <Text style={styles.chartTitle}>Xu hướng uống nước</Text>
+            </View>
             <BarChart
               data={{
                 labels: ['T2', 'T3', 'T4', 'T5', 'T6', 'T7', 'CN'],
@@ -238,7 +246,10 @@ const ReportsScreen = () => {
 
         {activeTab === 'weekly' && weeklyData?.exerciseTrend && (
           <View style={styles.chartCard}>
-            <Text style={styles.chartTitle}>🏃 Thời gian tập luyện</Text>
+            <View style={styles.chartTitleRow}>
+              <Ionicons name="fitness" size={18} color="#2e7d32" />
+              <Text style={styles.chartTitle}>Thời gian tập luyện</Text>
+            </View>
             <BarChart
               data={{
                 labels: ['T2', 'T3', 'T4', 'T5', 'T6', 'T7', 'CN'],
@@ -263,10 +274,13 @@ const ReportsScreen = () => {
 
         {/* Insights */}
         <View style={styles.insightsCard}>
-          <Text style={styles.insightsTitle}>💡 Phân tích & Gợi ý</Text>
+          <View style={styles.insightsTitleRow}>
+            <Ionicons name="bulb" size={18} color="#f57f17" />
+            <Text style={styles.insightsTitle}>Phân tích & Gợi ý</Text>
+          </View>
           {data.insights.map((insight, index) => (
             <View key={index} style={styles.insightRow}>
-              <Text style={styles.insightIcon}>{getInsightIcon(insight.type)}</Text>
+              <Ionicons name={getInsightIcon(insight.type)} size={16} color="#f57f17" style={styles.insightIcon} />
               <Text style={styles.insightText}>{insight.text}</Text>
             </View>
           ))}
@@ -275,7 +289,10 @@ const ReportsScreen = () => {
         {/* Comparison (Monthly only) */}
         {activeTab === 'monthly' && (
           <View style={styles.comparisonCard}>
-            <Text style={styles.comparisonTitle}>📊 So sánh với tháng trước</Text>
+            <View style={styles.comparisonTitleRow}>
+              <Ionicons name="stats-chart" size={18} color="#1976d2" />
+              <Text style={styles.comparisonTitle}>So sánh với tháng trước</Text>
+            </View>
             <View style={styles.comparisonRow}>
               <Text style={styles.comparisonLabel}>Nước uống</Text>
               <Text style={[styles.comparisonValue, { color: '#43a047' }]}>+5%</Text>

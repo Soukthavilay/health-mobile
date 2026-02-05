@@ -12,6 +12,7 @@ import {
   RefreshControl,
 } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
+import { Ionicons } from '@expo/vector-icons';
 import { useFocusEffect } from '@react-navigation/native';
 import {
   searchFoods,
@@ -22,10 +23,10 @@ import {
 } from '../services/api.js';
 
 const MEAL_TYPES = [
-  { id: 'breakfast', label: '🌅 Sáng', icon: '🌅' },
-  { id: 'lunch', label: '☀️ Trưa', icon: '☀️' },
-  { id: 'dinner', label: '🌙 Tối', icon: '🌙' },
-  { id: 'snack', label: '🍎 Snack', icon: '🍎' },
+  { id: 'breakfast', label: 'Sáng', icon: 'sunny' },
+  { id: 'lunch', label: 'Trưa', icon: 'sunny-outline' },
+  { id: 'dinner', label: 'Tối', icon: 'moon' },
+  { id: 'snack', label: 'Snack', icon: 'nutrition' },
 ];
 
 const NutritionScreen = () => {
@@ -196,7 +197,10 @@ const NutritionScreen = () => {
         contentContainerStyle={styles.container}
         refreshControl={<RefreshControl refreshing={refreshing} onRefresh={onRefresh} colors={['#e65100']} />}
       >
-        <Text style={styles.title}>🍽️ Dinh dưỡng</Text>
+        <View style={styles.titleRow}>
+          <Ionicons name="restaurant" size={28} color="#e65100" />
+          <Text style={styles.title}>Dinh dưỡng</Text>
+        </View>
         <Text style={styles.subtitle}>Theo dõi calo và bữa ăn</Text>
 
         {/* Calorie Summary */}
@@ -236,7 +240,8 @@ const NutritionScreen = () => {
 
         {/* Add Meal Button */}
         <TouchableOpacity style={styles.primaryButton} onPress={() => setModalVisible(true)}>
-          <Text style={styles.primaryButtonText}>+ Thêm bữa ăn</Text>
+          <Ionicons name="add-circle" size={20} color="#fff" style={styles.primaryButtonIcon} />
+          <Text style={styles.primaryButtonText}>Thêm bữa ăn</Text>
         </TouchableOpacity>
 
         {/* Meals by Type */}
@@ -247,7 +252,10 @@ const NutritionScreen = () => {
           return (
             <View key={type.id} style={styles.mealSection}>
               <View style={styles.mealHeader}>
-                <Text style={styles.mealTypeTitle}>{type.label}</Text>
+                <View style={styles.mealTypeRow}>
+                  <Ionicons name={type.icon} size={18} color="#e65100" />
+                  <Text style={styles.mealTypeTitle}>{type.label}</Text>
+                </View>
                 <Text style={styles.mealTypeCalories}>{typeCalories} cal</Text>
               </View>
 
@@ -311,7 +319,10 @@ const NutritionScreen = () => {
                 </View>
 
                 {/* Quick Add */}
-                <Text style={styles.label}>⚡ Chọn nhanh</Text>
+                <View style={styles.labelRow}>
+                  <Ionicons name="flash" size={16} color="#333" />
+                  <Text style={styles.label}>Chọn nhanh</Text>
+                </View>
                 <View style={styles.quickGrid}>
                   {commonFoods.slice(0, 6).map((food, index) => (
                     <TouchableOpacity

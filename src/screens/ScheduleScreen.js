@@ -9,13 +9,14 @@ import {
   RefreshControl,
 } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
+import { Ionicons } from '@expo/vector-icons';
 import { getReminders, createReminder, deleteReminder, markReminderDone } from '../services/api.js';
 import AddMedicationModal from '../components/AddMedicationModal.js';
 
 const REMINDER_TYPE_ICONS = {
-  medication: '💊',
-  water: '💧',
-  exercise: '🏃',
+  medication: 'medical',
+  water: 'water',
+  exercise: 'fitness',
 };
 
 const ScheduleScreen = () => {
@@ -95,7 +96,7 @@ const ScheduleScreen = () => {
     return days.map((d) => dayLabels[d] || d).join(', ');
   };
 
-  const getTypeIcon = (type) => REMINDER_TYPE_ICONS[type] || '📅';
+  const getTypeIcon = (type) => REMINDER_TYPE_ICONS[type] || 'calendar';
 
   return (
     <SafeAreaView style={styles.safeArea} edges={['top', 'bottom']}>
@@ -103,16 +104,20 @@ const ScheduleScreen = () => {
         contentContainerStyle={styles.container}
         refreshControl={<RefreshControl refreshing={refreshing} onRefresh={onRefresh} />}
       >
-        <Text style={styles.title}>📅 Đặt lịch</Text>
+        <View style={styles.titleRow}>
+          <Ionicons name="calendar" size={28} color="#0b3d91" />
+          <Text style={styles.title}>Đặt lịch</Text>
+        </View>
         <Text style={styles.subtitle}>Lịch nhắc uống thuốc, uống nước, tập thể dục</Text>
 
         <TouchableOpacity style={styles.primaryButton} onPress={() => setModalVisible(true)}>
-          <Text style={styles.primaryButtonText}>+ Tạo lịch nhắc</Text>
+          <Ionicons name="add-circle" size={20} color="#fff" style={styles.primaryButtonIcon} />
+          <Text style={styles.primaryButtonText}>Tạo lịch nhắc</Text>
         </TouchableOpacity>
 
         {reminders.length === 0 ? (
           <View style={styles.emptyContainer}>
-            <Text style={styles.emptyIcon}>📭</Text>
+            <Ionicons name="mail-open" size={44} color="#0b3d91" style={styles.emptyIcon} />
             <Text style={styles.emptyText}>Chưa có lịch nhắc nào</Text>
             <Text style={styles.emptyHint}>Tạo lịch nhắc để nhận thông báo đúng giờ</Text>
           </View>
@@ -122,7 +127,7 @@ const ScheduleScreen = () => {
             return (
               <View key={r.id} style={[styles.card, isCompleted && styles.cardCompleted]}>
                 <View style={styles.cardHeader}>
-                  <Text style={styles.cardIcon}>{getTypeIcon(r.type)}</Text>
+                  <Ionicons name={getTypeIcon(r.type)} size={24} color={isCompleted ? '#43a047' : '#0b3d91'} style={styles.cardIcon} />
                   <View style={styles.cardTitleContainer}>
                     <Text style={[styles.cardTitle, isCompleted && styles.cardTitleCompleted]}>
                       {r.title}
@@ -141,18 +146,21 @@ const ScheduleScreen = () => {
                       style={styles.doneButton}
                       onPress={() => handleMarkDone(r.id)}
                     >
-                      <Text style={styles.doneButtonText}>✓ Đã xong</Text>
+                      <Ionicons name="checkmark-circle" size={18} color="#fff" style={styles.actionIcon} />
+                      <Text style={styles.doneButtonText}>Đã xong</Text>
                     </TouchableOpacity>
                   )}
                   {isCompleted && (
                     <View style={styles.completedBadge}>
-                      <Text style={styles.completedBadgeText}>✅ Hoàn thành</Text>
+                      <Ionicons name="checkmark-done" size={16} color="#43a047" style={styles.actionIcon} />
+                      <Text style={styles.completedBadgeText}>Hoàn thành</Text>
                     </View>
                   )}
                   <TouchableOpacity
                     style={styles.deleteButton}
                     onPress={() => handleDeleteReminder(r.id)}
                   >
+                    <Ionicons name="trash" size={16} color="#e53935" style={styles.actionIcon} />
                     <Text style={styles.deleteButtonText}>Xóa</Text>
                   </TouchableOpacity>
                 </View>
@@ -164,7 +172,10 @@ const ScheduleScreen = () => {
         {/* Compliance Stats */}
         {reminders.length > 0 && (
           <View style={styles.statsCard}>
-            <Text style={styles.statsTitle}>📊 Thống kê hôm nay</Text>
+            <View style={styles.statsTitleRow}>
+              <Ionicons name="stats-chart" size={18} color="#0b3d91" />
+              <Text style={styles.statsTitle}>Thống kê hôm nay</Text>
+            </View>
             <Text style={styles.statsValue}>
               {completedToday.size} / {reminders.length} hoàn thành
             </Text>
@@ -198,11 +209,16 @@ const styles = StyleSheet.create({
     padding: 16,
     flexGrow: 1,
   },
+  titleRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 10,
+    marginBottom: 4,
+  },
   title: {
     fontSize: 28,
     fontWeight: '800',
     color: '#0b3d91',
-    marginBottom: 4,
   },
   subtitle: {
     fontSize: 16,
@@ -214,7 +230,13 @@ const styles = StyleSheet.create({
     paddingVertical: 16,
     borderRadius: 12,
     alignItems: 'center',
+    flexDirection: 'row',
+    justifyContent: 'center',
+    gap: 8,
     marginBottom: 16,
+  },
+  primaryButtonIcon: {
+    marginRight: 2,
   },
   primaryButtonText: {
     color: '#fff',
@@ -226,7 +248,6 @@ const styles = StyleSheet.create({
     paddingVertical: 40,
   },
   emptyIcon: {
-    fontSize: 48,
     marginBottom: 12,
   },
   emptyText: {
@@ -256,7 +277,6 @@ const styles = StyleSheet.create({
     alignItems: 'center',
   },
   cardIcon: {
-    fontSize: 28,
     marginRight: 12,
   },
   cardTitleContainer: {
@@ -296,6 +316,9 @@ const styles = StyleSheet.create({
     paddingVertical: 10,
     paddingHorizontal: 20,
     borderRadius: 10,
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 6,
   },
   doneButtonText: {
     color: '#fff',
@@ -307,6 +330,9 @@ const styles = StyleSheet.create({
     paddingVertical: 10,
     paddingHorizontal: 16,
     borderRadius: 10,
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 6,
   },
   completedBadgeText: {
     color: '#43a047',
@@ -316,6 +342,12 @@ const styles = StyleSheet.create({
   deleteButton: {
     paddingVertical: 10,
     paddingHorizontal: 16,
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 6,
+  },
+  actionIcon: {
+    marginRight: 2,
   },
   deleteButtonText: {
     color: '#e53935',
@@ -328,11 +360,16 @@ const styles = StyleSheet.create({
     padding: 16,
     marginTop: 8,
   },
+  statsTitleRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 8,
+    marginBottom: 8,
+  },
   statsTitle: {
     fontSize: 16,
     fontWeight: '700',
     color: '#0b3d91',
-    marginBottom: 8,
   },
   statsValue: {
     fontSize: 18,

@@ -589,9 +589,15 @@ export const getLeaderboard = async (challengeId) => {
 export const sendAIChat = async (message) => {
   try {
     const { data } = await api.post('/ai/chat', { message });
-    return data;
-  } catch {
-    return { response: 'Xin lỗi, tôi không thể trả lời lúc này. Vui lòng thử lại sau.' };
+    return {
+      ...data,
+      reply: data?.reply || data?.response || data?.message,
+    };
+  } catch (error) {
+    const status = error?.response?.status;
+    const serverMessage = error?.response?.data?.message;
+    console.log('sendAIChat error', { status, serverMessage });
+    return { reply: 'Xin lỗi, tôi không thể trả lời lúc này. Vui lòng thử lại sau.' };
   }
 };
 

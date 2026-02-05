@@ -11,28 +11,29 @@ import {
 } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { useFocusEffect } from '@react-navigation/native';
+import { Ionicons } from '@expo/vector-icons';
 import { getAchievements, getUserLevel } from '../services/api.js';
 
 const CATEGORIES = [
-  { id: 'all', label: '🏆 Tất cả' },
-  { id: 'water', label: '💧 Nước' },
-  { id: 'exercise', label: '🏃 Tập' },
-  { id: 'sleep', label: '😴 Ngủ' },
-  { id: 'nutrition', label: '🍽️ Dinh dưỡng' },
-  { id: 'goals', label: '🎯 Mục tiêu' },
-  { id: 'general', label: '📱 Chung' },
+  { id: 'all', label: 'Tất cả', icon: 'trophy' },
+  { id: 'water', label: 'Nước', icon: 'water' },
+  { id: 'exercise', label: 'Tập', icon: 'fitness' },
+  { id: 'sleep', label: 'Ngủ', icon: 'moon' },
+  { id: 'nutrition', label: 'Dinh dưỡng', icon: 'restaurant' },
+  { id: 'goals', label: 'Mục tiêu', icon: 'flag' },
+  { id: 'general', label: 'Chung', icon: 'apps' },
 ];
 
 const CATEGORY_ICONS = {
-  exercise: '🏃',
-  water: '💧',
-  sleep: '😴',
-  nutrition: '🍽️',
-  goals: '🎯',
-  general: '📱',
-  bmi: '⚖️',
-  medication: '💊',
-  social: '👥',
+  exercise: 'fitness',
+  water: 'water',
+  sleep: 'moon',
+  nutrition: 'restaurant',
+  goals: 'flag',
+  general: 'apps',
+  bmi: 'scale',
+  medication: 'medical',
+  social: 'people',
 };
 
 const AchievementsScreen = () => {
@@ -108,7 +109,10 @@ const AchievementsScreen = () => {
         contentContainerStyle={styles.container}
         refreshControl={<RefreshControl refreshing={refreshing} onRefresh={onRefresh} colors={['#f57c00']} />}
       >
-        <Text style={styles.title}>🏆 Thành tựu</Text>
+        <View style={styles.titleRow}>
+          <Ionicons name="trophy" size={28} color="#f57c00" />
+          <Text style={styles.title}>Thành tựu</Text>
+        </View>
         <Text style={styles.subtitle}>Thu thập huy hiệu sức khỏe</Text>
 
         {/* Stats */}
@@ -137,9 +141,16 @@ const AchievementsScreen = () => {
               style={[styles.categoryButton, selectedCategory === cat.id && styles.categoryButtonActive]}
               onPress={() => setSelectedCategory(cat.id)}
             >
-              <Text style={[styles.categoryText, selectedCategory === cat.id && styles.categoryTextActive]}>
-                {cat.label}
-              </Text>
+              <View style={styles.categoryContent}>
+                <Ionicons
+                  name={cat.icon}
+                  size={16}
+                  color={selectedCategory === cat.id ? '#fff' : '#f57c00'}
+                />
+                <Text style={[styles.categoryText, selectedCategory === cat.id && styles.categoryTextActive]}>
+                  {cat.label}
+                </Text>
+              </View>
             </TouchableOpacity>
           ))}
         </ScrollView>
@@ -150,7 +161,7 @@ const AchievementsScreen = () => {
             const unlocked = isUnlocked(achievement);
             const progress = getProgress(achievement);
             const progressPercent = Math.min((progress / (achievement.target_value || 1)) * 100, 100);
-            const icon = achievement.icon || CATEGORY_ICONS[achievement.category] || '🏆';
+            const icon = CATEGORY_ICONS[achievement.category] || 'trophy';
 
             return (
               <TouchableOpacity
@@ -158,9 +169,12 @@ const AchievementsScreen = () => {
                 style={[styles.achievementCard, unlocked && styles.achievementUnlocked]}
                 onPress={() => setDetailModal(achievement)}
               >
-                <Text style={[styles.achievementIcon, !unlocked && styles.achievementIconLocked]}>
-                  {icon}
-                </Text>
+                <Ionicons
+                  name={icon}
+                  size={34}
+                  color={unlocked ? '#f57c00' : '#bbb'}
+                  style={styles.achievementIcon}
+                />
                 <Text style={[styles.achievementTitle, !unlocked && styles.achievementTitleLocked]} numberOfLines={2}>
                   {achievement.name || achievement.title}
                 </Text>
@@ -172,7 +186,7 @@ const AchievementsScreen = () => {
                   </View>
                 )}
                 
-                {unlocked && <Text style={styles.checkmark}>✓</Text>}
+                {unlocked && <Ionicons name="checkmark-circle" size={18} color="#43a047" style={styles.checkmark} />}
               </TouchableOpacity>
             );
           })}
@@ -189,13 +203,21 @@ const AchievementsScreen = () => {
             <View style={styles.modalCard}>
               {detailModal && (
                 <>
-                  <Text style={styles.modalIcon}>{detailModal.icon || CATEGORY_ICONS[detailModal.category] || '🏆'}</Text>
+                  <Ionicons
+                    name={CATEGORY_ICONS[detailModal.category] || 'trophy'}
+                    size={56}
+                    color="#f57c00"
+                    style={styles.modalIcon}
+                  />
                   <Text style={styles.modalTitle}>{detailModal.name || detailModal.title}</Text>
                   <Text style={styles.modalDesc}>{detailModal.description || detailModal.desc}</Text>
                   
                   {isUnlocked(detailModal) ? (
                     <View style={styles.unlockedBadge}>
-                      <Text style={styles.unlockedText}>✅ Đã mở khóa</Text>
+                      <View style={styles.unlockedRow}>
+                        <Ionicons name="checkmark-done" size={18} color="#43a047" />
+                        <Text style={styles.unlockedText}>Đã mở khóa</Text>
+                      </View>
                       <Text style={styles.unlockedDate}>{getUnlockDate(detailModal)}</Text>
                     </View>
                   ) : (
@@ -214,7 +236,10 @@ const AchievementsScreen = () => {
                     </View>
                   )}
                   
-                  <Text style={styles.modalPoints}>🎖️ {detailModal.points} điểm</Text>
+                  <View style={styles.modalPointsRow}>
+                    <Ionicons name="ribbon" size={18} color="#f57c00" />
+                    <Text style={styles.modalPoints}>{detailModal.points} điểm</Text>
+                  </View>
                   
                   <TouchableOpacity style={styles.closeButton} onPress={() => setDetailModal(null)}>
                     <Text style={styles.closeButtonText}>Đóng</Text>

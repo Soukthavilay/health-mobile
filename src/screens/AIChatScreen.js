@@ -12,6 +12,7 @@ import {
 } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { useFocusEffect } from '@react-navigation/native';
+import { Ionicons } from '@expo/vector-icons';
 import { sendAIChat, getAISuggestions } from '../services/api.js';
 
 const DEFAULT_SUGGESTIONS = [
@@ -27,7 +28,7 @@ const AIChatScreen = () => {
     {
       id: 1,
       type: 'ai',
-      text: '👋 Xin chào! Tôi là trợ lý sức khỏe AI của bạn. Hãy hỏi tôi bất cứ điều gì về sức khỏe, dinh dưỡng, tập luyện, hoặc giấc ngủ nhé!',
+      text: 'Xin chào! Tôi là trợ lý sức khỏe AI của bạn. Hãy hỏi tôi bất cứ điều gì về sức khỏe, dinh dưỡng, tập luyện, hoặc giấc ngủ nhé!',
       time: new Date().toLocaleTimeString('vi-VN', { hour: '2-digit', minute: '2-digit' }),
     },
   ]);
@@ -77,7 +78,7 @@ const AIChatScreen = () => {
       const aiResponse = {
         id: Date.now() + 1,
         type: 'ai',
-        text: result.response || result.message || 'Xin lỗi, tôi không thể trả lời lúc này.',
+        text: result.reply || result.response || result.message || 'Xin lỗi, tôi không thể trả lời lúc này.',
         time: new Date().toLocaleTimeString('vi-VN', { hour: '2-digit', minute: '2-digit' }),
       };
       setMessages((prev) => [...prev, aiResponse]);
@@ -107,7 +108,10 @@ const AIChatScreen = () => {
       >
         {/* Header */}
         <View style={styles.header}>
-          <Text style={styles.title}>🤖 AI Health Assistant</Text>
+          <View style={styles.titleRow}>
+            <Ionicons name="sparkles" size={22} color="#fff" />
+            <Text style={styles.title}>AI Health Assistant</Text>
+          </View>
           <Text style={styles.subtitle}>Trợ lý sức khỏe thông minh</Text>
         </View>
 
@@ -144,7 +148,10 @@ const AIChatScreen = () => {
           {/* Quick Suggestions */}
           {messages.length <= 2 && !isTyping && (
             <View style={styles.suggestionsContainer}>
-              <Text style={styles.suggestionsTitle}>💡 Gợi ý câu hỏi:</Text>
+              <View style={styles.suggestionsTitleRow}>
+                <Ionicons name="bulb" size={16} color="#43a047" />
+                <Text style={styles.suggestionsTitle}>Gợi ý câu hỏi:</Text>
+              </View>
               {suggestions.map((suggestion, index) => (
                 <TouchableOpacity
                   key={index}
@@ -174,7 +181,7 @@ const AIChatScreen = () => {
             onPress={() => sendMessage(inputText)}
             disabled={!inputText.trim() || isTyping}
           >
-            <Text style={styles.sendButtonText}>➤</Text>
+            <Ionicons name="send" size={18} color="#fff" />
           </TouchableOpacity>
         </View>
       </KeyboardAvoidingView>
@@ -193,6 +200,11 @@ const styles = StyleSheet.create({
   header: {
     padding: 16,
     backgroundColor: '#43a047',
+  },
+  titleRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 8,
   },
   title: {
     fontSize: 22,
@@ -254,11 +266,16 @@ const styles = StyleSheet.create({
   suggestionsContainer: {
     marginTop: 10,
   },
+  suggestionsTitleRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 6,
+    marginBottom: 10,
+  },
   suggestionsTitle: {
     fontSize: 14,
     fontWeight: '700',
     color: '#43a047',
-    marginBottom: 10,
   },
   suggestionButton: {
     backgroundColor: '#fff',
