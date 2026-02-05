@@ -13,6 +13,7 @@ import {
   RefreshControl,
 } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
+import { Ionicons } from '@expo/vector-icons';
 import { BarChart } from 'react-native-chart-kit';
 import { useFocusEffect } from '@react-navigation/native';
 import {
@@ -44,11 +45,16 @@ const WaterIntakeScreen = () => {
         goal_ml: todayResult.goal_ml || 2000,
       });
       
-      // Format weekly data for chart
-      const formattedWeekly = weeklyResult.map((item) => ({
-        date: item.date || new Date(item.logged_date).toLocaleDateString('vi-VN', { day: '2-digit', month: '2-digit' }),
-        total_ml: item.total_ml || 0,
-      }));
+      // Format weekly data for chart with short date format
+      const formattedWeekly = weeklyResult.map((item) => {
+        const dateObj = new Date(item.logged_date || item.date);
+        const day = String(dateObj.getDate()).padStart(2, '0');
+        const month = String(dateObj.getMonth() + 1).padStart(2, '0');
+        return {
+          date: `${day}/${month}`,
+          total_ml: item.total_ml || 0,
+        };
+      });
       setWeeklyData(formattedWeekly);
     } catch (error) {
       console.log('Error fetching water data:', error);
@@ -167,7 +173,10 @@ const WaterIntakeScreen = () => {
         contentContainerStyle={styles.container}
         refreshControl={<RefreshControl refreshing={refreshing} onRefresh={onRefresh} colors={['#0b3d91']} />}
       >
-        <Text style={styles.title}>💧 Uống nước</Text>
+        <View style={styles.titleRow}>
+          <Ionicons name="water" size={28} color="#0b3d91" />
+          <Text style={styles.title}>Uống nước</Text>
+        </View>
         <Text style={styles.subtitle}>Theo dõi lượng nước hàng ngày</Text>
 
         {/* Circular Progress */}
@@ -204,11 +213,14 @@ const WaterIntakeScreen = () => {
         {/* Weekly Chart */}
         {weeklyData.length > 0 && (
           <View style={styles.card}>
-            <Text style={styles.cardTitle}>📊 7 ngày gần nhất</Text>
+            <View style={styles.cardTitleRow}>
+              <Ionicons name="bar-chart" size={18} color="#0b3d91" />
+              <Text style={styles.cardTitle}>7 ngày gần nhất</Text>
+            </View>
             <BarChart
               data={chartData}
               width={Dimensions.get('window').width - 64}
-              height={180}
+              height={200}
               yAxisSuffix="ml"
               chartConfig={{
                 backgroundColor: '#fff',
@@ -217,10 +229,14 @@ const WaterIntakeScreen = () => {
                 decimalPlaces: 0,
                 color: (opacity = 1) => `rgba(11, 61, 145, ${opacity})`,
                 labelColor: () => '#333',
-                barPercentage: 0.6,
+                barPercentage: 0.5,
+                propsForLabels: {
+                  fontSize: 11,
+                },
               }}
               style={{ marginTop: 8, borderRadius: 12 }}
               showValuesOnTopOfBars
+              fromZero
             />
             <View style={styles.goalLine}>
               <Text style={styles.goalLineText}>Mục tiêu: {todayData.goal_ml}ml/ngày</Text>
@@ -230,7 +246,10 @@ const WaterIntakeScreen = () => {
 
         {/* Today's Entries */}
         <View style={styles.card}>
-          <Text style={styles.cardTitle}>📝 Hôm nay</Text>
+          <View style={styles.cardTitleRow}>
+            <Ionicons name="list" size={18} color="#0b3d91" />
+            <Text style={styles.cardTitle}>Hôm nay</Text>
+          </View>
           {todayData.entries.length === 0 ? (
             <Text style={styles.emptyText}>Chưa có dữ liệu. Hãy uống nước nào!</Text>
           ) : (
@@ -297,11 +316,16 @@ const styles = StyleSheet.create({
     padding: 16,
     flexGrow: 1,
   },
+  titleRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 10,
+    marginBottom: 4,
+  },
   title: {
     fontSize: 28,
     fontWeight: '800',
     color: '#0b3d91',
-    marginBottom: 4,
   },
   subtitle: {
     fontSize: 16,
@@ -384,11 +408,16 @@ const styles = StyleSheet.create({
     borderWidth: 1,
     borderColor: '#0b3d91',
   },
+  cardTitleRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 8,
+    marginBottom: 12,
+  },
   cardTitle: {
     fontSize: 18,
     fontWeight: '800',
     color: '#0b3d91',
-    marginBottom: 12,
   },
   goalLine: {
     marginTop: 8,
