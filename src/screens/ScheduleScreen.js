@@ -10,7 +10,7 @@ import {
 } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { Ionicons } from '@expo/vector-icons';
-import { getReminders, createReminder, deleteReminder, markReminderDone } from '../services/api.js';
+import { getReminders, createReminder, deleteReminder, markReminderDone, getReminderHistory } from '../services/api.js';
 import AddMedicationModal from '../components/AddMedicationModal.js';
 
 const REMINDER_TYPE_ICONS = {
@@ -24,11 +24,32 @@ const ScheduleScreen = () => {
   const [refreshing, setRefreshing] = useState(false);
   const [modalVisible, setModalVisible] = useState(false);
   const [completedToday, setCompletedToday] = useState(new Set());
+  const [markingDoneIds, setMarkingDoneIds] = useState(new Set());
 
   const fetchReminders = async () => {
     try {
       const data = await getReminders();
       setReminders(Array.isArray(data) ? data : []);
+
+      // Fetch today's completed reminders from backend
+      const today = new Date();
+      const todayStr = today.toISOString().split('T')[0];
+      const completedIds = new Set();
+
+      await Promise.all(
+        (data || []).map(async (reminder) => {
+          try {
+            const history = await getReminderHistory(reminder.id, todayStr, todayStr);
+            if (history && history.length > 0) {
+              completedIds.add(reminder.id);
+            }
+          } catch {
+            // Ignore individual fetch errors
+          }
+        })
+      );
+
+      setCompletedToday(completedIds);
     } catch (err) {
       Alert.alert('Lỗi', err?.response?.data?.message || err?.message || 'Không thể tải lịch nhắc');
     }
@@ -72,11 +93,20 @@ const ScheduleScreen = () => {
   };
 
   const handleMarkDone = async (id) => {
+    if (markingDoneIds.has(id)) return;
+    setMarkingDoneIds((prev) => new Set([...prev, id]));
+
     try {
-      await markReminderDone(id);
+      await markReminderDone(id, new Date().toISOString());
       setCompletedToday((prev) => new Set([...prev, id]));
     } catch (err) {
-      // Silently handle for now
+      Alert.alert('Lỗi', err?.response?.data?.message || err?.message || 'Không thể đánh dấu hoàn thành');
+    } finally {
+      setMarkingDoneIds((prev) => {
+        const next = new Set(prev);
+        next.delete(id);
+        return next;
+      });
     }
   };
 
@@ -144,6 +174,7 @@ const ScheduleScreen = () => {
                   {!isCompleted && (
                     <TouchableOpacity
                       style={styles.doneButton}
+                      disabled={markingDoneIds.has(r.id)}
                       onPress={() => handleMarkDone(r.id)}
                     >
                       <Ionicons name="checkmark-circle" size={18} color="#fff" style={styles.actionIcon} />

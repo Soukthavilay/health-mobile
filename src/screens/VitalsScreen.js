@@ -39,13 +39,21 @@ const VitalsScreen = () => {
   const [loading, setLoading] = useState(true);
   const [refreshing, setRefreshing] = useState(false);
 
+  const toLocalDateString = (date) => {
+    const d = new Date(date);
+    const year = d.getFullYear();
+    const month = String(d.getMonth() + 1).padStart(2, '0');
+    const day = String(d.getDate()).padStart(2, '0');
+    return `${year}-${month}-${day}`;
+  };
+
   const fetchData = async () => {
     try {
       const today = new Date();
       const weekAgo = new Date(today);
       weekAgo.setDate(weekAgo.getDate() - 7);
-      const fromStr = weekAgo.toISOString().split('T')[0];
-      const toStr = today.toISOString().split('T')[0];
+      const fromStr = toLocalDateString(weekAgo);
+      const toStr = toLocalDateString(today);
 
       const [latestResult, heartRateHistory, spo2History] = await Promise.all([
         getLatestVitals(),
@@ -73,14 +81,14 @@ const VitalsScreen = () => {
       const spo2Data = dates.map(() => 0);
 
       (Array.isArray(heartRateHistory) ? heartRateHistory : []).forEach((v) => {
-        const d = new Date(v.recorded_at);
+        const d = new Date(v.measured_at || v.recorded_at);
         const label = `${String(d.getDate()).padStart(2, '0')}/${String(d.getMonth() + 1).padStart(2, '0')}`;
         const idx = dates.indexOf(label);
         if (idx !== -1) heartRateData[idx] = v.value || 0;
       });
 
       (Array.isArray(spo2History) ? spo2History : []).forEach((v) => {
-        const d = new Date(v.recorded_at);
+        const d = new Date(v.measured_at || v.recorded_at);
         const label = `${String(d.getDate()).padStart(2, '0')}/${String(d.getMonth() + 1).padStart(2, '0')}`;
         const idx = dates.indexOf(label);
         if (idx !== -1) spo2Data[idx] = v.value || 0;
@@ -128,7 +136,7 @@ const VitalsScreen = () => {
           ...prev,
           latest: {
             ...prev.latest,
-            blood_pressure: { systolic: sys, diastolic: dia, value: sys, value2: dia, recorded_at: new Date().toISOString() },
+            blood_pressure: { value: sys, value2: dia, measured_at: new Date().toISOString() },
           },
         }));
       } else {
@@ -142,7 +150,7 @@ const VitalsScreen = () => {
           ...prev,
           latest: {
             ...prev.latest,
-            [selectedType.id]: { value, recorded_at: new Date().toISOString() },
+            [selectedType.id]: { value, measured_at: new Date().toISOString() },
           },
         }));
       }
@@ -229,7 +237,7 @@ const VitalsScreen = () => {
                 {getVitalStatus('heart_rate', vitals.latest.heart_rate.value).label}
               </Text>
             )}
-            <Text style={styles.vitalTime}>{formatTime(vitals.latest.heart_rate?.recorded_at)}</Text>
+            <Text style={styles.vitalTime}>{formatTime(vitals.latest.heart_rate?.measured_at || vitals.latest.heart_rate?.recorded_at)}</Text>
           </View>
 
           {/* Blood Pressure */}
@@ -237,11 +245,11 @@ const VitalsScreen = () => {
             <Ionicons name="water" size={24} color="#c62828" style={styles.vitalIcon} />
             <Text style={styles.vitalLabel}>Huyết áp</Text>
             <Text style={styles.vitalValue}>
-              {vitals.latest.blood_pressure?.systolic || '--'}/{vitals.latest.blood_pressure?.diastolic || '--'}
+              {vitals.latest.blood_pressure?.value || '--'}/{vitals.latest.blood_pressure?.value2 || '--'}
               <Text style={styles.vitalUnit}> mmHg</Text>
             </Text>
             <Text style={styles.vitalNormal}>Bình thường: 90/60 - 120/80</Text>
-            <Text style={styles.vitalTime}>{formatTime(vitals.latest.blood_pressure?.recorded_at)}</Text>
+            <Text style={styles.vitalTime}>{formatTime(vitals.latest.blood_pressure?.measured_at || vitals.latest.blood_pressure?.recorded_at)}</Text>
           </View>
 
           {/* SpO2 */}
@@ -251,7 +259,7 @@ const VitalsScreen = () => {
             <Text style={styles.vitalValue}>
               {vitals.latest.spo2?.value || '--'} <Text style={styles.vitalUnit}>%</Text>
             </Text>
-            <Text style={styles.vitalTime}>{formatTime(vitals.latest.spo2?.recorded_at)}</Text>
+            <Text style={styles.vitalTime}>{formatTime(vitals.latest.spo2?.measured_at || vitals.latest.spo2?.recorded_at)}</Text>
           </View>
 
           {/* Temperature */}

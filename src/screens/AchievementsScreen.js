@@ -39,7 +39,6 @@ const CATEGORY_ICONS = {
 const AchievementsScreen = () => {
   const [achievements, setAchievements] = useState([]);
   const [userLevel, setUserLevel] = useState({ level: 1, points: 0 });
-  const [selectedCategory, setSelectedCategory] = useState('all');
   const [detailModal, setDetailModal] = useState(null);
   const [loading, setLoading] = useState(true);
   const [refreshing, setRefreshing] = useState(false);
@@ -84,9 +83,7 @@ const AchievementsScreen = () => {
     return new Date(achievement.unlocked_at).toLocaleDateString('vi-VN');
   };
 
-  const filteredAchievements = achievements.filter((a) =>
-    selectedCategory === 'all' || a.category === selectedCategory
-  );
+  const filteredAchievements = achievements;
 
   const unlockedCount = achievements.filter((a) => isUnlocked(a)).length;
   const totalCount = achievements.length;
@@ -132,28 +129,6 @@ const AchievementsScreen = () => {
             <Text style={styles.statLabel}>Hoàn thành</Text>
           </View>
         </View>
-
-        {/* Category Filter */}
-        <ScrollView horizontal showsHorizontalScrollIndicator={false} style={styles.categoryScroll}>
-          {CATEGORIES.map((cat) => (
-            <TouchableOpacity
-              key={cat.id}
-              style={[styles.categoryButton, selectedCategory === cat.id && styles.categoryButtonActive]}
-              onPress={() => setSelectedCategory(cat.id)}
-            >
-              <View style={styles.categoryContent}>
-                <Ionicons
-                  name={cat.icon}
-                  size={16}
-                  color={selectedCategory === cat.id ? '#fff' : '#f57c00'}
-                />
-                <Text style={[styles.categoryText, selectedCategory === cat.id && styles.categoryTextActive]}>
-                  {cat.label}
-                </Text>
-              </View>
-            </TouchableOpacity>
-          ))}
-        </ScrollView>
 
         {/* Achievements Grid */}
         <View style={styles.achievementsGrid}>
@@ -273,7 +248,10 @@ const styles = StyleSheet.create({
   statLabel: { fontSize: 12, color: '#666', marginTop: 4 },
   statDivider: { width: 1, backgroundColor: '#ddd' },
   categoryScroll: { marginBottom: 16 },
+  categoryScrollContent: { alignItems: 'center', paddingRight: 8 },
+  categoryContent: { flexDirection: 'row', alignItems: 'center' },
   categoryButton: {
+    height: 40,
     paddingVertical: 10,
     paddingHorizontal: 16,
     borderRadius: 20,
@@ -281,13 +259,15 @@ const styles = StyleSheet.create({
     marginRight: 8,
     borderWidth: 2,
     borderColor: '#f57c00',
+    flexShrink: 0,
+    justifyContent: 'center',
   },
   categoryButtonActive: { backgroundColor: '#f57c00' },
   categoryText: { fontSize: 13, fontWeight: '600', color: '#f57c00' },
   categoryTextActive: { color: '#fff' },
-  achievementsGrid: { flexDirection: 'row', flexWrap: 'wrap', gap: 10 },
+  achievementsGrid: { flexDirection: 'row', flexWrap: 'wrap', justifyContent: 'space-between' },
   achievementCard: {
-    width: '48%',
+    width: '49%',
     backgroundColor: '#f5f5f5',
     borderRadius: 14,
     padding: 14,
@@ -295,6 +275,7 @@ const styles = StyleSheet.create({
     borderWidth: 2,
     borderColor: '#ddd',
     position: 'relative',
+    marginBottom: 10,
   },
   achievementUnlocked: { backgroundColor: '#fff', borderColor: '#f57c00' },
   achievementIcon: { fontSize: 36, marginBottom: 8 },

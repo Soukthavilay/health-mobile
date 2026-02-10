@@ -49,13 +49,21 @@ const ExerciseScreen = () => {
   const [calories, setCalories] = useState('');
   const [notes, setNotes] = useState('');
 
+  const toLocalDateString = (date) => {
+    const d = new Date(date);
+    const year = d.getFullYear();
+    const month = String(d.getMonth() + 1).padStart(2, '0');
+    const day = String(d.getDate()).padStart(2, '0');
+    return `${year}-${month}-${day}`;
+  };
+
   const fetchData = async () => {
     try {
       const today = new Date();
       const from = new Date(today);
       from.setDate(from.getDate() - 30);
-      const fromStr = from.toISOString().split('T')[0];
-      const toStr = today.toISOString().split('T')[0];
+      const fromStr = toLocalDateString(from);
+      const toStr = toLocalDateString(today);
       
       const [exercisesResult, streakResult, statsResult] = await Promise.all([
         getExercises(fromStr, toStr),
@@ -72,7 +80,7 @@ const ExerciseScreen = () => {
       for (let i = 6; i >= 0; i--) {
         const d = new Date(today);
         d.setDate(d.getDate() - i);
-        const dateStr = d.toISOString().split('T')[0];
+        const dateStr = toLocalDateString(d);
         const dayExercises = exercisesResult?.filter((e) => 
           e.exercised_at?.startsWith(dateStr)
         ) || [];

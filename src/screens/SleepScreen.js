@@ -37,6 +37,14 @@ const SleepScreen = () => {
   const [loading, setLoading] = useState(true);
   const [refreshing, setRefreshing] = useState(false);
 
+  const toLocalDateString = (date) => {
+    const d = new Date(date);
+    const year = d.getFullYear();
+    const month = String(d.getMonth() + 1).padStart(2, '0');
+    const day = String(d.getDate()).padStart(2, '0');
+    return `${year}-${month}-${day}`;
+  };
+
   // Form state
   const [sleepHour, setSleepHour] = useState(23);
   const [sleepMinute, setSleepMinute] = useState(0);
@@ -49,8 +57,8 @@ const SleepScreen = () => {
       const today = new Date();
       const from = new Date(today);
       from.setDate(from.getDate() - 30);
-      const fromStr = from.toISOString().split('T')[0];
-      const toStr = today.toISOString().split('T')[0];
+      const fromStr = toLocalDateString(from);
+      const toStr = toLocalDateString(today);
 
       const [logsResult, avgResult] = await Promise.all([
         getSleepLogs(fromStr, toStr),
@@ -65,7 +73,7 @@ const SleepScreen = () => {
       for (let i = 6; i >= 0; i--) {
         const d = new Date(today);
         d.setDate(d.getDate() - i);
-        const dateStr = d.toISOString().split('T')[0];
+        const dateStr = toLocalDateString(d);
         const dayLog = logsResult?.find((log) =>
           log.wake_time?.startsWith(dateStr)
         );

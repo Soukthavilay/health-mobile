@@ -90,528 +90,301 @@ export const deleteReminder = async (id) => {
 };
 
 // ============================================
-// WATER INTAKE APIs (Mock data until backend ready)
+// WATER INTAKE APIs
 // ============================================
-const MOCK_WATER_DATA = {
-  entries: [],
-  total_ml: 0,
-  goal_ml: 2000,
-};
-
 export const getWaterIntake = async (date) => {
-  try {
-    const { data } = await api.get(`/water-intake?date=${date}`);
-    return data;
-  } catch {
-    // Return mock data if API not ready
-    return { ...MOCK_WATER_DATA };
-  }
+  const { data } = await api.get(`/water-intake?date=${date}`);
+  return data;
 };
 
 export const getWaterIntakeWeekly = async () => {
-  try {
-    const { data } = await api.get('/water-intake/weekly');
-    return data;
-  } catch {
-    // Return mock weekly data
-    return [
-      { date: 'Mon', total_ml: 1800 },
-      { date: 'Tue', total_ml: 2100 },
-      { date: 'Wed', total_ml: 1500 },
-      { date: 'Thu', total_ml: 2000 },
-      { date: 'Fri', total_ml: 1700 },
-      { date: 'Sat', total_ml: 2200 },
-      { date: 'Sun', total_ml: 1000 },
-    ];
-  }
+  const { data } = await api.get('/water-intake/weekly');
+  return data;
 };
 
 export const addWaterIntake = async ({ amount_ml, logged_at }) => {
-  try {
-    const { data } = await api.post('/water-intake', { amount_ml, logged_at });
-    return data;
-  } catch {
-    // Return mock response
-    return { id: Date.now(), amount_ml, logged_at: logged_at || new Date().toISOString() };
-  }
+  const { data } = await api.post('/water-intake', { amount_ml, logged_at });
+  return data;
 };
 
 export const deleteWaterIntake = async (id) => {
-  try {
-    await api.delete(`/water-intake/${id}`);
-  } catch {
-    // Silently fail for mock
-  }
+  await api.delete(`/water-intake/${id}`);
 };
 
 // ============================================
-// EXERCISE APIs (Mock data until backend ready)
+// EXERCISE APIs
 // ============================================
 export const logExercise = async (exerciseData) => {
-  try {
-    const { data } = await api.post('/exercises', exerciseData);
-    return data;
-  } catch {
-    return { id: Date.now(), ...exerciseData, exercised_at: exerciseData.exercised_at || new Date().toISOString() };
-  }
+  const { data } = await api.post('/exercises', exerciseData);
+  return data;
 };
 
 export const getExercises = async (from, to) => {
-  try {
-    const { data } = await api.get(`/exercises?from=${from}&to=${to}`);
-    return data;
-  } catch {
-    return [];
-  }
+  const { data } = await api.get(`/exercises?from=${from}&to=${to}`);
+  return data;
 };
 
 export const getExerciseStreak = async () => {
-  try {
-    const { data } = await api.get('/exercises/streak');
-    return data;
-  } catch {
-    return { current_streak: 0, longest_streak: 0, last_exercise_date: null };
-  }
+  const { data } = await api.get('/exercises/streak');
+  return data;
 };
 
 export const getExerciseStats = async (from, to) => {
-  try {
-    const { data } = await api.get(`/exercises/stats?from=${from}&to=${to}`);
-    return data;
-  } catch {
-    return { total_sessions: 0, total_minutes: 0, total_calories: 0, by_type: {} };
-  }
+  const { data } = await api.get(`/exercises/stats?from=${from}&to=${to}`);
+  return data;
 };
 
 export const deleteExercise = async (id) => {
-  try {
-    await api.delete(`/exercises/${id}`);
-  } catch {
-    // Silently fail for mock
-  }
+  await api.delete(`/exercises/${id}`);
 };
 
 // ============================================
-// SLEEP APIs (Mock data until backend ready)
+// SLEEP APIs
 // ============================================
 export const logSleep = async (sleepData) => {
-  try {
-    const { data } = await api.post('/sleep-logs', sleepData);
-    return data;
-  } catch {
-    const sleepTime = new Date(sleepData.sleep_time);
-    const wakeTime = new Date(sleepData.wake_time);
-    const durationHours = (wakeTime - sleepTime) / (1000 * 60 * 60);
-    return { id: Date.now(), ...sleepData, duration_hours: durationHours };
-  }
+  const { data } = await api.post('/sleep-logs', sleepData);
+  return data;
 };
 
 export const getSleepLogs = async (from, to) => {
-  try {
-    const { data } = await api.get(`/sleep-logs?from=${from}&to=${to}`);
-    return data;
-  } catch {
-    return [];
-  }
+  const { data } = await api.get(`/sleep-logs?from=${from}&to=${to}`);
+  return data;
 };
 
 export const getSleepAverage = async () => {
-  try {
-    const { data } = await api.get('/sleep-logs/average');
-    return data;
-  } catch {
-    return { avg_duration_hours: 0, avg_sleep_time: null, avg_wake_time: null, quality_distribution: {} };
-  }
+  const { data } = await api.get('/sleep-logs/average');
+  return data;
 };
 
 export const deleteSleepLog = async (id) => {
-  try {
-    await api.delete(`/sleep-logs/${id}`);
-  } catch {
-    // Silently fail for mock
-  }
+  await api.delete(`/sleep-logs/${id}`);
 };
 
 // ============================================
 // MEDICATION COMPLIANCE APIs
 // ============================================
 export const markReminderDone = async (id, done_at) => {
-  try {
-    const { data } = await api.post(`/reminders/${id}/done`, { done_at });
-    return data;
-  } catch {
-    return { id: Date.now(), reminder_id: id, done_at: done_at || new Date().toISOString() };
-  }
+  const { data } = await api.post(`/reminders/${id}/done`, { done_at });
+  return data;
 };
 
 export const getReminderHistory = async (id, from, to) => {
-  try {
-    const { data } = await api.get(`/reminders/${id}/history?from=${from}&to=${to}`);
-    return data;
-  } catch {
-    return [];
-  }
+  const { data } = await api.get(`/reminders/${id}/history?from=${from}&to=${to}`);
+  return data;
 };
 
 export const getReminderCompliance = async (from, to) => {
-  try {
-    const { data } = await api.get(`/reminders/compliance?from=${from}&to=${to}`);
-    return data;
-  } catch {
-    return { total_expected: 0, total_done: 0, percentage: 0 };
-  }
+  const { data } = await api.get(`/reminders/compliance?from=${from}&to=${to}`);
+  return data;
 };
 
 // ============================================
 // GROUP 2: NUTRITION/MEAL APIs
 // ============================================
 export const searchFoods = async (search, limit = 20) => {
-  try {
-    const { data } = await api.get(`/foods?search=${encodeURIComponent(search)}&limit=${limit}`);
-    return data;
-  } catch {
-    return [];
-  }
+  const { data } = await api.get(`/foods?search=${encodeURIComponent(search)}&limit=${limit}`);
+  return data;
 };
 
 export const createFood = async (foodData) => {
-  try {
-    const { data } = await api.post('/foods', foodData);
-    return data;
-  } catch {
-    return { id: Date.now(), ...foodData, is_custom: true };
-  }
+  const { data } = await api.post('/foods', foodData);
+  return data;
 };
 
 export const logMeal = async (mealData) => {
-  try {
-    const { data } = await api.post('/meal-logs', mealData);
-    return data;
-  } catch {
-    return { id: Date.now(), ...mealData, logged_at: new Date().toISOString() };
-  }
+  const { data } = await api.post('/meal-logs', mealData);
+  return data;
 };
 
 export const getMealLogs = async (date) => {
-  try {
-    const { data } = await api.get(`/meal-logs?date=${date}`);
-    return data;
-  } catch {
-    return [];
-  }
+  const { data } = await api.get(`/meal-logs?date=${date}`);
+  return data;
 };
 
 export const deleteMealLog = async (id) => {
-  try {
-    await api.delete(`/meal-logs/${id}`);
-  } catch {
-    // Silently fail
-  }
+  await api.delete(`/meal-logs/${id}`);
 };
 
 export const getNutritionSummary = async (date) => {
-  try {
-    const params = date ? `?date=${date}` : '';
-    const { data } = await api.get(`/nutrition/daily-summary${params}`);
-    return data;
-  } catch {
-    return { calories: 0, protein_g: 0, carbs_g: 0, fat_g: 0, goal_calories: 2000 };
-  }
+  const params = date ? `?date=${date}` : '';
+  const { data } = await api.get(`/nutrition/daily-summary${params}`);
+  return data;
 };
 
 // ============================================
 // GROUP 2: GOALS APIs
 // ============================================
 export const createGoal = async (goalData) => {
-  try {
-    const { data } = await api.post('/goals', goalData);
-    return data;
-  } catch {
-    return { id: Date.now(), ...goalData, progress: 0, status: 'active' };
-  }
+  const { data } = await api.post('/goals', goalData);
+  return data;
 };
 
 export const getGoals = async (status = 'active') => {
-  try {
-    const { data } = await api.get(`/goals?status=${status}`);
-    return data;
-  } catch {
-    return [];
-  }
+  const { data } = await api.get(`/goals?status=${status}`);
+  return data;
 };
 
 export const getGoalDetail = async (id) => {
-  try {
-    const { data } = await api.get(`/goals/${id}`);
-    return data;
-  } catch {
-    return null;
-  }
+  const { data } = await api.get(`/goals/${id}`);
+  return data;
 };
 
 export const updateGoal = async (id, updates) => {
-  try {
-    const { data } = await api.put(`/goals/${id}`, updates);
-    return data;
-  } catch {
-    return { id, ...updates };
-  }
+  const { data } = await api.put(`/goals/${id}`, updates);
+  return data;
 };
 
 export const deleteGoal = async (id) => {
-  try {
-    await api.delete(`/goals/${id}`);
-  } catch {
-    // Silently fail
-  }
+  await api.delete(`/goals/${id}`);
 };
 
 // ============================================
 // GROUP 2: VITALS APIs
 // ============================================
 export const logVital = async (vitalData) => {
-  try {
-    const { data } = await api.post('/vitals', vitalData);
-    return data;
-  } catch {
-    return { id: Date.now(), ...vitalData, recorded_at: new Date().toISOString() };
-  }
+  const { data } = await api.post('/vitals', vitalData);
+  return data;
 };
 
 export const getVitals = async (type, from, to) => {
-  try {
-    let params = [];
-    if (type) params.push(`type=${type}`);
-    if (from) params.push(`from=${from}`);
-    if (to) params.push(`to=${to}`);
-    const query = params.length > 0 ? `?${params.join('&')}` : '';
-    const { data } = await api.get(`/vitals${query}`);
-    return data;
-  } catch {
-    return [];
-  }
+  let params = [];
+  if (type) params.push(`type=${type}`);
+  if (from) params.push(`from=${from}`);
+  if (to) params.push(`to=${to}`);
+  const query = params.length > 0 ? `?${params.join('&')}` : '';
+  const { data } = await api.get(`/vitals${query}`);
+  return data;
 };
 
 export const getLatestVitals = async () => {
-  try {
-    const { data } = await api.get('/vitals/latest');
-    return data;
-  } catch {
-    return {};
-  }
+  const { data } = await api.get('/vitals/latest');
+  return data;
 };
 
 // ============================================
 // GROUP 2: REPORTS APIs
 // ============================================
 export const getWeeklyReport = async (weekStart) => {
-  try {
-    const params = weekStart ? `?week_start=${weekStart}` : '';
-    const { data } = await api.get(`/reports/weekly${params}`);
-    return data;
-  } catch {
-    return { exercise: {}, sleep: {}, water: {}, nutrition: {}, insights: [] };
-  }
+  const params = weekStart ? `?week_start=${weekStart}` : '';
+  const { data } = await api.get(`/reports/weekly${params}`);
+  return data;
 };
 
 export const getMonthlyReport = async (month) => {
-  try {
-    const params = month ? `?month=${month}` : '';
-    const { data } = await api.get(`/reports/monthly${params}`);
-    return data;
-  } catch {
-    return { exercise: {}, sleep: {}, water: {}, nutrition: {}, insights: [], month_over_month: {} };
-  }
+  const params = month ? `?month=${month}` : '';
+  const { data } = await api.get(`/reports/monthly${params}`);
+  return data;
 };
 
 // ============================================
 // GROUP 3: ACHIEVEMENTS APIs
 // ============================================
 export const getAchievements = async () => {
-  try {
-    const { data } = await api.get('/achievements');
-    return data;
-  } catch {
-    return [];
-  }
+  const { data } = await api.get('/achievements');
+  return data;
 };
 
 export const getRecentAchievements = async (limit = 10) => {
-  try {
-    const { data } = await api.get(`/achievements/recent?limit=${limit}`);
-    return data;
-  } catch {
-    return [];
-  }
+  const { data } = await api.get(`/achievements/recent?limit=${limit}`);
+  return data;
 };
 
 export const getUserLevel = async () => {
-  try {
-    const { data } = await api.get('/achievements/level');
-    return data;
-  } catch {
-    return { level: 1, points: 0, next_level_points: 100 };
-  }
+  const { data } = await api.get('/achievements/level');
+  return data;
 };
 
 // ============================================
 // GROUP 3: PERIOD TRACKER APIs
 // ============================================
 export const logPeriod = async (periodData) => {
-  try {
-    const { data } = await api.post('/period-logs', periodData);
-    return data;
-  } catch {
-    return { id: Date.now(), ...periodData };
-  }
+  const { data } = await api.post('/period-logs', periodData);
+  return data;
 };
 
 export const getPeriodLogs = async () => {
-  try {
-    const { data } = await api.get('/period-logs');
-    return data;
-  } catch {
-    return [];
-  }
+  const { data } = await api.get('/period-logs');
+  return data;
 };
 
 export const getPeriodPredictions = async () => {
-  try {
-    const { data } = await api.get('/period/predictions');
-    return data;
-  } catch {
-    return { next_period: null, fertile_window: null, avg_cycle_length: null };
-  }
+  const { data } = await api.get('/period/predictions');
+  return data;
 };
 
 // ============================================
 // GROUP 3: SYMPTOM CHECKER APIs
 // ============================================
 export const getBodyParts = async () => {
-  try {
-    const { data } = await api.get('/symptoms/body-parts');
-    return data;
-  } catch {
-    return [];
-  }
+  const { data } = await api.get('/symptoms/body-parts');
+  return data;
 };
 
 export const checkSymptoms = async (symptomData) => {
-  try {
-    const { data } = await api.post('/symptoms/check', symptomData);
-    return data;
-  } catch {
-    return { conditions: [], advice: '', disclaimer: 'Vui lòng tham khảo ý kiến bác sĩ.' };
-  }
+  const { data } = await api.post('/symptoms/check', symptomData);
+  return data;
 };
 
 // ============================================
 // GROUP 3: SOCIAL/FRIENDS APIs
 // ============================================
 export const getFriends = async () => {
-  try {
-    const { data } = await api.get('/friends');
-    return data;
-  } catch {
-    return [];
-  }
+  const { data } = await api.get('/friends');
+  return data;
 };
 
 export const sendFriendRequest = async (userId) => {
-  try {
-    const { data } = await api.post('/friends/request', { user_id: userId });
-    return data;
-  } catch {
-    return null;
-  }
+  const { data } = await api.post('/friends/request', { user_id: userId });
+  return data;
 };
 
 export const respondFriendRequest = async (requestId, action) => {
-  try {
-    const { data } = await api.put(`/friends/request/${requestId}`, { action });
-    return data;
-  } catch {
-    return null;
-  }
+  const { data } = await api.put(`/friends/request/${requestId}`, { action });
+  return data;
 };
 
 export const getPendingRequests = async () => {
-  try {
-    const { data } = await api.get('/friends/requests/pending');
-    return data;
-  } catch {
-    return [];
-  }
+  const { data } = await api.get('/friends/requests/pending');
+  return data;
 };
 
 // ============================================
 // GROUP 3: CHALLENGES APIs
 // ============================================
 export const createChallenge = async (challengeData) => {
-  try {
-    const { data } = await api.post('/challenges', challengeData);
-    return data;
-  } catch {
-    return { id: Date.now(), ...challengeData };
-  }
+  const { data } = await api.post('/challenges', challengeData);
+  return data;
 };
 
 export const getChallenges = async (status = 'active') => {
-  try {
-    const { data } = await api.get(`/challenges?status=${status}`);
-    return data;
-  } catch {
-    return [];
-  }
+  const { data } = await api.get(`/challenges?status=${status}`);
+  return data;
 };
 
 export const joinChallenge = async (challengeId) => {
-  try {
-    const { data } = await api.post(`/challenges/${challengeId}/join`);
-    return data;
-  } catch {
-    return null;
-  }
+  const { data } = await api.post(`/challenges/${challengeId}/join`);
+  return data;
 };
 
 export const getLeaderboard = async (challengeId) => {
-  try {
-    const { data } = await api.get(`/challenges/${challengeId}/leaderboard`);
-    return data;
-  } catch {
-    return [];
-  }
+  const { data } = await api.get(`/challenges/${challengeId}/leaderboard`);
+  return data;
 };
 
 // ============================================
 // GROUP 3: AI CHAT APIs
 // ============================================
 export const sendAIChat = async (message) => {
-  try {
-    const { data } = await api.post('/ai/chat', { message });
-    return {
-      ...data,
-      reply: data?.reply || data?.response || data?.message,
-    };
-  } catch (error) {
-    const status = error?.response?.status;
-    const serverMessage = error?.response?.data?.message;
-    console.log('sendAIChat error', { status, serverMessage });
-    return { reply: 'Xin lỗi, tôi không thể trả lời lúc này. Vui lòng thử lại sau.' };
-  }
+  const { data } = await api.post('/ai/chat', { message });
+  return {
+    ...data,
+    reply: data?.reply || data?.response || data?.message,
+  };
 };
 
 export const getAISuggestions = async () => {
-  try {
-    const { data } = await api.get('/ai/suggestions');
-    return data;
-  } catch {
-    return [
-      'Làm sao để giảm cân hiệu quả?',
-      'Tôi nên tập thể dục bao lâu mỗi ngày?',
-      'Chế độ ăn uống lành mạnh là gì?',
-    ];
-  }
+  const { data } = await api.get('/ai/suggestions');
+  return data;
 };
 
 export default api;

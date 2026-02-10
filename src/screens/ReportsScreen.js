@@ -13,7 +13,7 @@ import { SafeAreaView } from 'react-native-safe-area-context';
 import { Ionicons } from '@expo/vector-icons';
 import { BarChart } from 'react-native-chart-kit';
 import { useFocusEffect } from '@react-navigation/native';
-import { getWeeklyReport, getMonthlyReport } from '../services/api.js';
+import { getWeeklyReport, getMonthlyReport, getHealthStats } from '../services/api.js';
 
 const ReportsScreen = () => {
   const [activeTab, setActiveTab] = useState('weekly');
@@ -30,10 +30,13 @@ const ReportsScreen = () => {
       const weekStartStr = weekStart.toISOString().split('T')[0];
       const monthStr = `${today.getFullYear()}-${String(today.getMonth() + 1).padStart(2, '0')}`;
 
-      const [weeklyResult, monthlyResult] = await Promise.all([
+      const [weeklyResult, monthlyResult, healthStats] = await Promise.all([
         getWeeklyReport(weekStartStr),
         getMonthlyReport(monthStr),
+        getHealthStats().catch(() => []),
       ]);
+
+      const currentBmi = healthStats?.[0]?.bmi ? Number(healthStats[0].bmi).toFixed(1) : 0;
 
       // Transform weekly data
       const weekly = {
@@ -53,7 +56,7 @@ const ReportsScreen = () => {
             avg: parseFloat((weeklyResult.sleep?.avg_hours || 0).toFixed(1)),
             quality: getSleepQuality(weeklyResult.sleep?.avg_hours),
           },
-          bmi: { current: 22.5, change: 0 },
+          bmi: { current: currentBmi, change: 0 },
         },
         waterTrend: weeklyResult.water?.daily_data?.map((d) => d.total_ml) || null,
         exerciseTrend: weeklyResult.exercise?.daily_data?.map((d) => d.total_minutes) || null,
@@ -79,7 +82,7 @@ const ReportsScreen = () => {
             avg: parseFloat((monthlyResult.sleep?.avg_hours || 0).toFixed(1)),
             quality: getSleepQuality(monthlyResult.sleep?.avg_hours),
           },
-          bmi: { current: 22.5, change: 0 },
+          bmi: { current: currentBmi, change: monthlyResult.summary?.bmi_change || 0 },
         },
         insights: monthlyResult.insights || [],
         monthOverMonth: monthlyResult.month_over_month || {},
@@ -271,20 +274,6 @@ const ReportsScreen = () => {
             />
           </View>
         )}
-
-        {/* Insights */}
-        <View style={styles.insightsCard}>
-          <View style={styles.insightsTitleRow}>
-            <Ionicons name="bulb" size={18} color="#f57f17" />
-            <Text style={styles.insightsTitle}>Phân tích & Gợi ý</Text>
-          </View>
-          {data.insights.map((insight, index) => (
-            <View key={index} style={styles.insightRow}>
-              <Ionicons name={getInsightIcon(insight.type)} size={16} color="#f57f17" style={styles.insightIcon} />
-              <Text style={styles.insightText}>{insight.text}</Text>
-            </View>
-          ))}
-        </View>
 
         {/* Comparison (Monthly only) */}
         {activeTab === 'monthly' && (

@@ -12,14 +12,21 @@ import {
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { Ionicons } from '@expo/vector-icons';
 import { clearToken, clearUser } from '../storage/authStorage.js';
-import { getHealthStats, getProfile } from '../services/api.js';
+import { 
+  getHealthStats, 
+  getProfile, 
+  getWaterIntake, 
+  getExerciseStats, 
+  getExerciseStreak,
+  getSleepAverage,
+  getSleepLogs,
+  getNutritionSummary,
+  getLatestVitals,
+  getReminders,
+  getReminderHistory
+} from '../services/api.js';
 import GreetingHeader from '../components/GreetingHeader.js';
 import WidgetCard from '../components/WidgetCard.js';
-
-// Mock data for widgets (will be replaced with real API calls)
-const getMockWaterData = () => ({ current: 1250, goal: 2000 });
-const getMockExerciseData = () => ({ streak: 3, todayMinutes: 30 });
-const getMockSleepData = () => ({ lastNight: 7.5, average: 7.2 });
 
 const SummaryScreen = ({ navigation }) => {
   const [profile, setProfile] = useState(null);
@@ -31,19 +38,72 @@ const SummaryScreen = ({ navigation }) => {
   const [waterData, setWaterData] = useState({ current: 0, goal: 2000 });
   const [exerciseData, setExerciseData] = useState({ streak: 0, todayMinutes: 0 });
   const [sleepData, setSleepData] = useState({ lastNight: 0, average: 0 });
+  const [nutritionData, setNutritionData] = useState({ calories: 0, goal: 2000 });
+  const [vitalsData, setVitalsData] = useState({ heart_rate: null, blood_pressure: null, spo2: null, temperature: null });
+  const [remindersToday, setRemindersToday] = useState({ done: 0, total: 0 });
 
   const current = useMemo(() => stats?.[0] || null, [stats]);
 
+  const toLocalDateString = (date) => {
+    const d = new Date(date);
+    const year = d.getFullYear();
+    const month = String(d.getMonth() + 1).padStart(2, '0');
+    const day = String(d.getDate()).padStart(2, '0');
+    return `${year}-${month}-${day}`;
+  };
+
   const fetchAll = async () => {
     try {
-      const [p, s] = await Promise.all([getProfile(), getHealthStats()]);
+      const today = toLocalDateString(new Date());
+      const y = new Date();
+      y.setDate(y.getDate() - 1);
+      const yesterday = toLocalDateString(y);
+      
+      const [p, s, water, exerciseStreak, exerciseStats, sleepAvg, sleepLogs, nutritionSummary, latestVitals, reminders] = await Promise.all([
+        getProfile(),
+        getHealthStats(),
+        getWaterIntake(today).catch(() => ({ total_ml: 0, goal_ml: 2000 })),
+        getExerciseStreak().catch(() => ({ current_streak: 0 })),
+        getExerciseStats(today, today).catch(() => ({ total_minutes: 0 })),
+        getSleepAverage().catch(() => ({ avg_duration_hours: 0 })),
+        getSleepLogs(yesterday, today).catch(() => []),
+        getNutritionSummary(today).catch(() => ({ calories: 0, goal_calories: 2000 })),
+        getLatestVitals().catch(() => ({})),
+        getReminders().catch(() => []),
+      ]);
+      
       setProfile(p);
       setStats(Array.isArray(s) ? s : []);
       
-      // Load mock widget data
-      setWaterData(getMockWaterData());
-      setExerciseData(getMockExerciseData());
-      setSleepData(getMockSleepData());
+      // Load real widget data from APIs
+      setWaterData({ current: water.total_ml || 0, goal: water.goal_ml || 2000 });
+      setExerciseData({ streak: exerciseStreak.current_streak || 0, todayMinutes: exerciseStats.total_minutes || 0 });
+      const lastNight = Array.isArray(sleepLogs) && sleepLogs.length > 0 ? Number(sleepLogs[0].duration_hours || 0) : 0;
+      setSleepData({ lastNight, average: sleepAvg.avg_duration_hours || 0 });
+
+      setNutritionData({ calories: nutritionSummary.calories || nutritionSummary.total_calories || 0, goal: nutritionSummary.goal_calories || 2000 });
+
+      setVitalsData({
+        heart_rate: latestVitals.heart_rate || null,
+        blood_pressure: latestVitals.blood_pressure || null,
+        spo2: latestVitals.spo2 || null,
+        temperature: latestVitals.temperature || null,
+      });
+
+      // Compute reminders completion today (sync with backend)
+      const reminderList = Array.isArray(reminders) ? reminders : [];
+      const doneSet = new Set();
+      await Promise.all(
+        reminderList.map(async (r) => {
+          try {
+            const history = await getReminderHistory(r.id, today, today);
+            if (Array.isArray(history) && history.length > 0) doneSet.add(r.id);
+          } catch {
+            // ignore
+          }
+        })
+      );
+      setRemindersToday({ done: doneSet.size, total: reminderList.length });
     } catch (err) {
       Alert.alert('Lỗi', err?.response?.data?.message || err?.message || 'Không thể tải dữ liệu');
     }
@@ -76,6 +136,7 @@ const SummaryScreen = ({ navigation }) => {
   const bmiValue = current?.bmi ? Number(current.bmi).toFixed(1) : '--';
   const bmiCategory = getBmiCategory(current?.bmi);
   const waterProgress = (waterData.current / waterData.goal) * 100;
+  const nutritionProgress = (nutritionData.calories / nutritionData.goal) * 100;
 
   return (
     <SafeAreaView style={styles.safeArea} edges={['top', 'bottom']}>
@@ -165,6 +226,63 @@ const SummaryScreen = ({ navigation }) => {
             onPress={() => navigation.navigate('SleepTab')}
           />
         </View>
+
+        <View style={styles.widgetRow}>
+          {/* Nutrition Widget */}
+          <WidgetCard
+            icon="restaurant"
+            title="Dinh dưỡng"
+            value={nutritionData.calories}
+            unit={`/${nutritionData.goal} cal`}
+            progress={nutritionProgress}
+            progressColor="#fb8c00"
+            backgroundColor="#fff3e0"
+            onPress={() => navigation.navigate('Nutrition')}
+          />
+
+          {/* Reminders Widget */}
+          <WidgetCard
+            icon="calendar"
+            title="Nhắc nhở"
+            value={remindersToday.done}
+            unit={`/${remindersToday.total}`}
+            subtitle="Hôm nay"
+            subtitleIcon="checkmark-circle"
+            backgroundColor="#e3f2fd"
+            onPress={() => navigation.navigate('ScheduleTab')}
+          />
+        </View>
+
+        {/* Vitals Quick Overview */}
+        <TouchableOpacity style={styles.vitalsCard} onPress={() => navigation.navigate('Vitals')} activeOpacity={0.85}>
+          <View style={styles.vitalsTitleRow}>
+            <Ionicons name="pulse" size={18} color="#c62828" />
+            <Text style={styles.vitalsTitle}>Chỉ số sinh tồn (mới nhất)</Text>
+            <Text style={styles.vitalsArrow}>›</Text>
+          </View>
+          <View style={styles.vitalsRow}>
+            <View style={styles.vitalsItem}>
+              <Text style={styles.vitalsLabel}>Nhịp tim</Text>
+              <Text style={styles.vitalsValue}>{vitalsData.heart_rate?.value ?? '--'} bpm</Text>
+            </View>
+            <View style={styles.vitalsItem}>
+              <Text style={styles.vitalsLabel}>Huyết áp</Text>
+              <Text style={styles.vitalsValue}>
+                {vitalsData.blood_pressure ? `${vitalsData.blood_pressure.value}/${vitalsData.blood_pressure.value2}` : '--/--'}
+              </Text>
+            </View>
+          </View>
+          <View style={styles.vitalsRow}>
+            <View style={styles.vitalsItem}>
+              <Text style={styles.vitalsLabel}>SpO2</Text>
+              <Text style={styles.vitalsValue}>{vitalsData.spo2?.value ?? '--'}%</Text>
+            </View>
+            <View style={styles.vitalsItem}>
+              <Text style={styles.vitalsLabel}>Nhiệt độ</Text>
+              <Text style={styles.vitalsValue}>{vitalsData.temperature?.value ?? '--'}°C</Text>
+            </View>
+          </View>
+        </TouchableOpacity>
 
         {/* Health Insights */}
         <View style={styles.insightsCard}>
@@ -291,6 +409,55 @@ const styles = StyleSheet.create({
   widgetRow: {
     flexDirection: 'row',
     gap: 10,
+  },
+  vitalsCard: {
+    backgroundColor: '#fff',
+    borderRadius: 14,
+    padding: 16,
+    borderWidth: 1,
+    borderColor: '#ef9a9a',
+    marginBottom: 16,
+  },
+  vitalsTitleRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 8,
+    marginBottom: 12,
+  },
+  vitalsTitle: {
+    flex: 1,
+    fontSize: 16,
+    fontWeight: '800',
+    color: '#c62828',
+  },
+  vitalsArrow: {
+    fontSize: 24,
+    color: '#999',
+    marginLeft: 8,
+  },
+  vitalsRow: {
+    flexDirection: 'row',
+    gap: 10,
+    marginBottom: 8,
+  },
+  vitalsItem: {
+    flex: 1,
+    backgroundColor: '#fff5f5',
+    borderRadius: 12,
+    padding: 12,
+    borderWidth: 1,
+    borderColor: '#ffcdd2',
+  },
+  vitalsLabel: {
+    fontSize: 12,
+    fontWeight: '700',
+    color: '#7f0000',
+    marginBottom: 4,
+  },
+  vitalsValue: {
+    fontSize: 16,
+    fontWeight: '900',
+    color: '#222',
   },
   insightsCard: {
     backgroundColor: '#fff9c4',
