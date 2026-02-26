@@ -15,6 +15,7 @@ import SymptomCheckerScreen from '../screens/SymptomCheckerScreen.js';
 import PeriodTrackerScreen from '../screens/PeriodTrackerScreen.js';
 import BloodSugarScreen from '../screens/BloodSugarScreen.js';
 import AchievementsScreen from '../screens/AchievementsScreen.js';
+import DashboardScreen from '../screens/DashboardScreen.js';
 import MainTabs from './MainTabs.js';
 import { loadToken } from '../storage/authStorage.js';
 import { getProfile } from '../services/api.js';
@@ -74,6 +75,7 @@ const RootNavigator = () => {
         <Stack.Screen name="PeriodTracker" component={PeriodTrackerScreen} options={{ title: 'Kinh nguyệt' }} />
         <Stack.Screen name="BloodSugar" component={BloodSugarScreen} options={{ title: 'Huyết áp & Đường' }} />
         <Stack.Screen name="Achievements" component={AchievementsScreen} options={{ title: 'Thành tựu' }} />
+        <Stack.Screen name="DashboardScreen" component={DashboardScreen} options={{ title: 'Chỉ số BMI' }} />
       </Stack.Navigator>
     </NavigationContainer>
   );
